@@ -1,0 +1,6 @@
+package application
+
+var (
+	SERVICE_NAME_CORE_LEDGER_POSTER   = "CORE_LEDGER_POSTER"
+	SERVICE_ENDPOINT_POST_TRANSACTION = "post_transaction"
+)
