@@ -41,11 +41,12 @@ core-ledger                 ← only service with direct DB writes
 ### Internal package conventions
 
 Every service follows the same layout:
-- `model/` or `glmodel/` — `.proto` source files and hand-written domain types
+- `model/`, `glmodel/`, `ftpmodel/`, `pmtmodel/` — `.proto` source files and hand-written domain types
 - `generated/` — compiled gRPC/protobuf Go code (never edit manually)
 - `service/` — business logic; one file per operation (e.g. `post_ledger_transaction.go`)
 - `bus/` — NATS connect/send/receive helpers (copy-consistent across services)
 - `application/<servicename>/cmd/` — Cobra commands; `start.go` wires flags → service constructor → gRPC server
+- `otel/` — OpenTelemetry instrumentation and tracing
 
 ## Common Commands
 

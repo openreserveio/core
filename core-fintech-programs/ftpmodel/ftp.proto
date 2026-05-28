@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "/ftpmodel";
+
+service FintechProgramService {
+
+  rpc CheckFintechProgramParticipation(CheckFintechProgramParticipationRequest) returns (CheckFintechProgramParticipationResponse);
+
+}
+
+
+message CheckFintechProgramParticipationRequest {
+
+}
+
+message CheckFintechProgramParticipationResponse {
+
+  message Status {
+    int64 code = 1;
+    string statusMessage = 2;
+  }
+
+  Status status = 1;
+
+
+}

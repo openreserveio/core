@@ -2,8 +2,11 @@ package otel
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/nats-io/nats.go"
+	"github.com/nats-io/nats.go/micro"
 	"go.opentelemetry.io/contrib/exporters/autoexport"
 	ot "go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -35,6 +38,26 @@ func EndSpan(ctx context.Context) {
 func AddEvent(eventName string, vars ...interface{}) {
 	message := fmt.Sprintf(eventName, vars...)
 	currentSpan.AddEvent(message)
+}
+
+func AddError(errorName string, err error, vars ...interface{}) {
+	messageError := fmt.Errorf("APP ERROR: %s - %v", fmt.Sprintf(errorName, vars...), err)
+	currentSpan.RecordError(errors.New(messageError.Error()))
+}
+
+func InjectNatsHeaders(ctx context.Context, msg *nats.Msg) {
+
+	prop := ot.GetTextMapPropagator()
+	prop.Inject(ctx, natsHeaderCarrier(msg.Header))
+
+}
+
+func ExtractNatsContext(request micro.Request) context.Context {
+
+	prop := ot.GetTextMapPropagator()
+	ctx := prop.Extract(context.Background(), natsHeaderCarrier(request.Headers()))
+	return ctx
+
 }
 
 func NewExporter(ctx context.Context, exporterType string) sdktrace.SpanExporter {
@@ -79,4 +102,22 @@ func NewTracerProvider(serviceName string, exp sdktrace.SpanExporter) {
 	ot.SetTracerProvider(tracerProvider)
 	Tracer = tracerProvider.Tracer(serviceName)
 
+}
+
+type natsHeaderCarrier nats.Header
+
+func (c natsHeaderCarrier) Get(key string) string {
+	return nats.Header(c).Get(key)
+}
+
+func (c natsHeaderCarrier) Set(key string, value string) {
+	nats.Header(c).Set(key, value)
+}
+
+func (c natsHeaderCarrier) Keys() []string {
+	keys := make([]string, 0, len(c))
+	for k := range c {
+		keys = append(keys, k)
+	}
+	return keys
 }

@@ -1,0 +1,8 @@
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /:flowName                --> github.com/s8sg/goflow/runtime.router.newRequestHandlerWrapper.func1 (3 handlers)
+[GIN-debug] GET    /:flowName                --> github.com/s8sg/goflow/runtime.router.newRequestHandlerWrapper.func2 (3 handlers)

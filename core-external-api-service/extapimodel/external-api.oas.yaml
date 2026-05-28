@@ -1,0 +1,319 @@
+openapi: 3.0.3
+info:
+  title: "Finsorb External API Service"
+  description: |
+
+    This service exposes REST endpoints for the Finsorb Core GL, Core Ledger, and related services
+
+  version: 1.0.0
+servers:
+  - url: "https://api.finsorb.com/"
+    description: "Finsorb External API Services"
+security:
+  - bearerAuth: []
+paths:
+  /oauth/token:
+    post:
+      summary: "OAuth2 token endpoint (client credentials grant)"
+      description: |
+        Exchanges client credentials for a signed JWT access token. The returned
+        token must be presented as a Bearer token on all other API endpoints.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/TokenRequest"
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenRequest"
+      responses:
+        "200":
+          description: "Access token issued"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: "Invalid request"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OAuthError"
+        "401":
+          description: "Invalid client credentials"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OAuthError"
+  /oauth/revoke:
+    post:
+      summary: "OAuth2 token revocation endpoint"
+      description: "Revokes a previously issued access token (RFC 7009)."
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/RevocationRequest"
+      responses:
+        "200":
+          description: "Token revoked (also returned for unknown tokens, per RFC 7009)"
+  /.well-known/jwks.json:
+    get:
+      summary: "JSON Web Key Set"
+      description: |
+        Returns the set of public keys used to verify access tokens issued by
+        the `/oauth/token` endpoint.
+      security: []
+      responses:
+        "200":
+          description: "JWKS document"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JWKS"
+  /.well-known/oauth-authorization-server:
+    get:
+      summary: "OAuth 2.0 Authorization Server Metadata (RFC 8414)"
+      security: []
+      responses:
+        "200":
+          description: "Authorization server metadata"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthorizationServerMetadata"
+  /ledger:
+    get:
+      summary: "Get the ledger"
+      responses:
+        "200":
+          description: "Ledger"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ledger"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /gl/transaction:
+    post:
+      summary: "Post a Transaction to the GL"
+      responses:
+        "200":
+          description: "Transaction"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LedgerEntry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT access token obtained from the `/oauth/token` endpoint. The token
+        is signed by the issuer; clients and resource servers verify signatures
+        using the public keys published at `/.well-known/jwks.json`.
+    oauth2ClientCredentials:
+      type: oauth2
+      description: "OAuth 2.0 Client Credentials flow (RFC 6749 §4.4)"
+      flows:
+        clientCredentials:
+          tokenUrl: https://api.finsorb.com/oauth/token
+          refreshUrl: https://api.finsorb.com/oauth/token
+          scopes:
+            ledger:read: "Read ledger entries"
+            ledger:write: "Post entries to the ledger"
+            gl:read: "Read general ledger data"
+            gl:write: "Post transactions to the general ledger"
+  responses:
+    Unauthorized:
+      description: "Missing or invalid access token"
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: 'Bearer realm="finsorb", error="invalid_token"'
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthError"
+    Forbidden:
+      description: "Token does not grant the required scope"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OAuthError"
+  schemas:
+    TokenRequest:
+      type: object
+      required:
+        - grant_type
+      properties:
+        grant_type:
+          type: string
+          enum: [client_credentials]
+          description: "Must be `client_credentials`."
+        client_id:
+          type: string
+          description: |
+            Client identifier. May alternatively be supplied via HTTP Basic
+            authentication on the request.
+        client_secret:
+          type: string
+          format: password
+          description: |
+            Client secret. May alternatively be supplied via HTTP Basic
+            authentication on the request.
+        scope:
+          type: string
+          description: "Space-separated list of requested scopes."
+          example: "ledger:read gl:write"
+        audience:
+          type: string
+          description: "Optional target audience for the issued token."
+    TokenResponse:
+      type: object
+      required:
+        - access_token
+        - token_type
+        - expires_in
+      properties:
+        access_token:
+          type: string
+          description: "Signed JWT access token."
+        token_type:
+          type: string
+          enum: [Bearer]
+        expires_in:
+          type: integer
+          format: int32
+          description: "Token lifetime in seconds."
+          example: 3600
+        scope:
+          type: string
+          description: "Space-separated list of scopes actually granted."
+    RevocationRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+        token_type_hint:
+          type: string
+          enum: [access_token, refresh_token]
+    OAuthError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          enum:
+            - invalid_request
+            - invalid_client
+            - invalid_grant
+            - unauthorized_client
+            - unsupported_grant_type
+            - invalid_scope
+            - invalid_token
+            - insufficient_scope
+        error_description:
+          type: string
+        error_uri:
+          type: string
+          format: uri
+    JWKS:
+      type: object
+      required:
+        - keys
+      properties:
+        keys:
+          type: array
+          items:
+            $ref: "#/components/schemas/JWK"
+    JWK:
+      type: object
+      required:
+        - kty
+        - kid
+      properties:
+        kty:
+          type: string
+          example: RSA
+        use:
+          type: string
+          example: sig
+        kid:
+          type: string
+        alg:
+          type: string
+          example: RS256
+        n:
+          type: string
+          description: "RSA modulus (base64url)."
+        e:
+          type: string
+          description: "RSA exponent (base64url)."
+        crv:
+          type: string
+          description: "EC curve name (e.g. P-256), when kty=EC."
+        x:
+          type: string
+          description: "EC x coordinate (base64url), when kty=EC."
+        y:
+          type: string
+          description: "EC y coordinate (base64url), when kty=EC."
+    AuthorizationServerMetadata:
+      type: object
+      properties:
+        issuer:
+          type: string
+          format: uri
+        token_endpoint:
+          type: string
+          format: uri
+        revocation_endpoint:
+          type: string
+          format: uri
+        jwks_uri:
+          type: string
+          format: uri
+        grant_types_supported:
+          type: array
+          items:
+            type: string
+          example: [client_credentials]
+        token_endpoint_auth_methods_supported:
+          type: array
+          items:
+            type: string
+          example: [client_secret_basic, client_secret_post]
+        scopes_supported:
+          type: array
+          items:
+            type: string
+        response_types_supported:
+          type: array
+          items:
+            type: string
+    Ledger:
+      type: object
+      properties:
+        ledger:
+          type: array
+          items:
+            $ref: "#/components/schemas/LedgerEntry"
+    LedgerEntry:
+      type: object

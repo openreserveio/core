@@ -1,0 +1,28 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  # otlp_http/langfuse:
+  #   endpoint: "https://us.cloud.langfuse.com/api/public/otel"
+  #   headers:
+  #     "Authorization": "Basic cGstbGYtZTgxYjViMDEtMWJiYy00NzVjLWFlZDMtYTM0YmVlMjA5MWYwOnNrLWxmLTI4MTE5NjczLTcxOGUtNDQ3OC04NmJjLWRkZDQwMGRlMDg4ZA=="
+  #     "x-langfuse-ingestion-version": "4"
+  otlp_http/jaeger:
+    endpoint: "http://jaeger:4318"
+  
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [otlp_http/jaeger]
+    metrics:
+      receivers: [otlp]
+      exporters: [otlp_http/jaeger]
+    logs:
+      receivers: [otlp]
+      exporters: [otlp_http/jaeger]

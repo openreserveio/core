@@ -10,6 +10,7 @@ import (
 	"github.com/openreserveio/core/core-ledger-poster/application"
 	"github.com/openreserveio/core/core-ledger-poster/bus"
 	"github.com/openreserveio/core/core-ledger-poster/generated/model"
+	"github.com/openreserveio/core/core-ledger-poster/otel"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -22,7 +23,10 @@ type CoreLedgerPosterService struct {
 	JetstreamClient jetstream.JetStream
 }
 
-func NewCoreLedgerPosterService(coreLedgerUrl string, busConnUrl string) (*CoreLedgerPosterService, error) {
+func NewCoreLedgerPosterService(ctx context.Context, coreLedgerUrl string, busConnUrl string) (*CoreLedgerPosterService, error) {
+
+	ctx = otel.StartSpan(ctx, "CoreLedgerPosterService.NewCoreLedgerPosterService")
+	defer otel.EndSpan(ctx)
 
 	clpService := CoreLedgerPosterService{}
 	clpService.BusConnUrl = busConnUrl
@@ -71,23 +75,32 @@ func (clps *CoreLedgerPosterService) Start(ctx context.Context) error {
 
 func (clps *CoreLedgerPosterService) ProcessMessage(request micro.Request) {
 
+	ctx := otel.ExtractNatsContext(request)
+	ctx = otel.StartSpan(ctx, "CoreLedgerPosterService.ProcessMessage")
+	defer otel.EndSpan(ctx)
+
 	log.Infof("Processing message")
+	otel.AddEvent("Processing message")
 	var postLedgerTxRequest model.PostLedgerTransactionRequest
 	err := bus.Receive(request, &postLedgerTxRequest)
 	if err != nil {
 		log.Errorf("Error processing post ledger transaction request: %v", err)
+		otel.AddError("Error processing post ledger transaction request", err)
 		bus.ReplyWithBadRequestError(request, err)
 		return
 	}
 
 	log.Infof("Posting ledger transaction")
+	otel.AddEvent("Posting ledger transaction")
 	response, err := clps.LedgerClient.PostLedgerTransaction(context.Background(), &postLedgerTxRequest)
 	if err != nil {
+		otel.AddError("Call to Core Ledger resulted in an error", err)
 		log.Fatalf("Call to Core Ledger resulted in an error:  %v", err)
 		bus.ReplyWithSystemError(request, err)
 		return
 	}
 
+	otel.AddEvent("Ledger transaction posted, reply OK")
 	bus.ReplyOK(request, response)
 
 }

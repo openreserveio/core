@@ -1,0 +1,122 @@
+version: "3.5"
+
+volumes:
+  redis_data:
+    driver: local
+  pgdb_data:
+    driver: local
+  nats_one:
+    driver: local
+  nats_two:
+    driver: local
+  nats_three:
+    driver: local
+
+services:
+  #############################################
+  # CONFIGURATION AND MESSAGING               
+  #
+  # PORTS:
+  #   - 4222 NATS
+  #   - 6222 NATS
+  #   - 8222 NATS
+  #############################################
+  otelcollector:
+    container_name: otel-collector
+    image: otel/opentelemetry-collector:latest
+    restart: always
+    volumes:
+    - ./otel-collector-config.yaml:/etc/otelcol/config.yaml
+    ports:
+      - 1888:1888 # pprof extension
+      - 8888:8888 # Prometheus metrics exposed by the Collector
+      - 8889:8889 # Prometheus exporter metrics
+      - 13133:13133 # health_check extension
+      - 4317:4317 # OTLP gRPC receiver
+      - 4318:4318 # OTLP http receiver
+      - 55679:55679 # zpages extension
+
+  jaeger:
+    image: jaegertracing/jaeger:latest
+    ports:
+      - "16686:16686"
+      - "16687:16687"
+      - "14317:4317"
+      - "14318:4318"
+    environment:
+      - LOG_LEVEL=debug
+    
+
+
+  redis:
+    container_name: redis
+    image: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command:
+      - /bin/sh
+      - -c
+      - redis-server --appendonly yes
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  pg_coreledger:
+    container_name: db
+    image: postgres:latest
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - "POSTGRES_USER=coreuser"
+      - "POSTGRES_PASSWORD=corepassword"
+      - "POSTGRES_DB=coreledgerdb"
+    volumes:
+      - "pgdb_data:/var/lib/postgresql"
+      - "./pg_init:/docker-entrypoint-initdb.d"
+    
+  nats_one:
+    container_name: nats01
+    image: nats:latest
+    restart: always
+    ports:
+      - 4222:4222
+      - 6222:6222
+    environment:
+      - "OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcollector:4318"
+    command: "-js --config /etc/nats/nats-server.conf"
+    volumes:
+      - "./nats-config/nats_one:/etc/nats"
+      - "nats_one:/etc/storage"
+
+  nats_two:
+    container_name: nats02
+    image: nats:latest
+    restart: always
+    ports:
+      - 4322:4322
+      - 6322:6322
+    environment:
+      - "OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcollector:4318"
+    command: "-js --config /etc/nats/nats-server.conf"
+    volumes:
+      - "./nats-config/nats_two:/etc/nats"
+      - "nats_two:/etc/storage"
+
+  nats_three:
+    container_name: nats03
+    image: nats:latest
+    restart: always
+    ports:
+      - 4422:4422
+      - 6422:6422
+    environment:
+      - "OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcollector:4318"
+    command: "-js --config /etc/nats/nats-server.conf"
+    volumes:
+      - "./nats-config/nats_three:/etc/nats"
+      - "nats_three:/etc/storage"
