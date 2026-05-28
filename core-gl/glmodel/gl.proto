@@ -1,0 +1,338 @@
+syntax = "proto3";
+
+option go_package = "/glmodel";
+
+
+service GeneralLedgerService {
+
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
+  rpc GetAccount(GetAccountRequest) returns (GetAccountResponse);
+  rpc UpdateAccountMetadata(UpdateAccountMetadataRequest) returns (UpdateAccountMetadataResponse);
+
+  rpc GetChartOfAccounts(GetChartOfAccountsRequest) returns (GetChartOfAccountsResponse);
+  rpc CreateChartOfAccounts(CreateChartOfAccountsRequest) returns (CreateChartOfAccountsResponse);
+
+  rpc PostTransaction(PostTransactionRequest) returns (PostTransactionResponse);
+
+  rpc CreateEntity(CreateEntityRequest) returns (CreateEntityResponse);
+  rpc GetEntity(GetEntityRequest) returns (GetEntityResponse);
+
+  rpc GenerateReport(GenerateReportRequest) returns (GenerateReportResponse);
+
+}
+
+message CreateAccountRequest {
+
+  enum AccountType {
+    FBO = 0;
+    FBO_CUSTOMER = 1;
+    PAYMENT_US_FEDNOW = 2;
+    PAYMENT_US_FEDWIRE = 3;
+    PAYMENT_US_ACH = 4;
+    PAYMENT_US_DLT = 5;
+    REGULAR_GL = 6;
+    DDA = 7;
+    SDA = 8;
+
+  }
+
+  AccountType accountType = 1;
+  string ledgerId = 2;
+  string accountCode = 3;
+  string currency = 4;
+  repeated string tags = 5;
+  string parentAccountCode = 6;
+  string accountClass = 7;
+  string owningEntityId = 8;
+  string name = 9;
+
+}
+
+message CreateAccountResponse {
+
+  message Status {
+    int64 code = 1;
+    string statusMessage = 2;
+  }
+
+  Status status = 1;
+  string accountId = 2;
+  string accountCode = 3;
+}
+
+message GetAccountRequest {
+
+  string ledgerId = 1;
+  string accountId = 2;
+  string accountCode = 3;
+  string asOfDate = 4;
+
+}
+
+message GetAccountResponse {
+  message Status {
+    int64 code = 1;
+    string statusMessage = 2;
+  }
+
+  Status status = 1;
+  string ledgerId = 2;
+  string accountId = 3;
+  string accountCode = 4;
+  repeated string tags = 5;
+  string parentAccountCode = 6;
+  string accountClass = 7;
+  string currency = 8;
+
+}
+
+message UpdateAccountMetadataRequest {
+
+  string ledgerId = 1;
+  string accountCode = 2;
+  string accountId = 3;
+  map<string, string> metadata = 4;
+
+}
+
+message UpdateAccountMetadataResponse {
+
+  message Status {
+    int64 code = 1;
+    string statusMessage = 2;
+  }
+
+  Status status = 1;
+
+}
+
+message GetChartOfAccountsRequest {
+  string ledgerId = 1;
+}
+
+message GetChartOfAccountsResponse {
+
+  message Status {
+    int64 code = 1;
+    string statusMessage = 2;
+  }
+
+  Status status = 1;
+  bytes chartJSON = 2;
+}
+
+message CreateChartOfAccountsRequest {
+  bytes proposedChartJSON = 1;
+  string title = 2;
+}
+
+message CreateChartOfAccountsResponse {
+
+  message Status {
+    int64 code = 1;
+    string statusMessage = 2;
+  }
+
+  Status status = 1;
+  string createdLedgerId = 2;
+  bytes chartJSON = 3;
+}
+
+
+message JournalEntry {
+
+  repeated JournalEntryItem debits = 1;
+  repeated JournalEntryItem credits = 2;
+  string purpose = 3;
+  string posterEntityId = 4;
+  repeated string taggedEntityId = 5;
+
+}
+
+message JournalEntryItem {
+
+  string accountCode = 1;
+  int64 amount = 2;
+  string note = 3;
+  repeated string taggedEntityId = 4;
+
+}
+
+
+message LedgerEntityName {
+  string entityNameId = 1;
+  string individualGivenName = 2;
+  string individualSurName = 3;
+  string individualMiddleName = 4;
+  string usSoleProprietorshipName = 5;
+  string usLLCName = 6;
+  string usCorporateName = 7;
+  string usGovernmentAgencyName = 8;
+  string foreignCorporationName = 9;
+  string createDate = 10;
+}
+
+
+message LedgerEntityAddress {
+
+  string entityAddressId = 1;
+  string rawAddress = 2;
+
+}
+
+message LedgerEntity {
+
+  enum EntityType {
+    INDIVIDUAL = 0;
+    US_SOLE_PROPRIETORSHIP = 1;
+    US_LLC = 2;
+    US_CORPORATION = 3;
+    US_GOVERNMENT_AGENCY = 4;
+    FOREIGN_CORPORATION = 5;
+  }
+
+  string entityId = 1;
+  EntityType entityType = 2;
+  LedgerEntityName entityName = 3;
+  LedgerEntityAddress mailingAddress = 4;
+  LedgerEntityAddress businessAddress = 5;
+  string verificationStatus = 6;
+  string createDate = 7;
+  string modifiedDate = 8;
+
+}
+
+message CorePayment {
+
+  enum PaymentLifecycle {
+    INITIAL_POSTING = 0;
+    CLEARING_POSTING = 1;
+    CUSTOMER_ACCOUNT_POSTING = 2;
+  }
+
+  PaymentLifecycle lifecycle = 1;
+  string paymentId = 2;
+
+}
+
+message PostTransactionRequest {
+
+  enum TransactionType {
+    JOURNAL_ENTRY = 0;
+    US_PAYMENT_ACH = 1;
+    US_PAYMENT_FEDNOW = 2;
+    US_PAYMENT_FEDWIRE = 3;
+    DLT = 4;
+  }
+
+  string ledgerId = 1;
+  TransactionType transactionType = 2;
+  JournalEntry journalEntry = 3;
+  CorePayment corePayment = 4;
+  LedgerEntity ultimateOriginator = 5;
+  LedgerEntity ultimateBeneficiary = 6;
+
+
+}
+
+message PostTransactionResponse {
+
+  message Status {
+    int64 code = 1;
+    string statusMessage = 2;
+  }
+
+  Status status = 1;
+  string transactionId = 2;
+  string transactionStatus = 3; // SUBMITTED, POSTED, REJECTED
+  bytes transactionStatusDetail = 4;
+
+}
+
+message CreateEntityRequest {
+
+  LedgerEntity entity = 1;
+
+}
+
+message CreateEntityResponse {
+
+
+  message Status {
+    int64 code = 1;
+    string statusMessage = 2;
+  }
+
+  Status status = 1;
+  string entityId = 2;
+}
+
+message GetEntityRequest {
+  string entityId = 1;
+
+}
+
+message GetEntityResponse {
+
+
+  message Status {
+    int64 code = 1;
+    string statusMessage = 2;
+  }
+
+  Status status = 1;
+  LedgerEntity entity = 2;
+
+}
+
+message CreateFBOAccountRequest {
+  string ledgerId = 1;
+}
+
+message CreateFBOAccountResponse {
+  message Status {
+    int64 code = 1;
+    string statusMessage = 2;
+  }
+  Status status = 1;
+}
+
+message CreateFBOCustomerAccountRequest {
+  string ledgerId = 1;
+  string fboAccount = 2;
+  LedgerEntity owningEntity = 3;
+}
+
+message CreateFBOCustomerAccountResponse {
+  string ledgerId = 1;
+  string fboAccount = 2;
+  LedgerEntity owningEntity = 3;
+}
+
+
+message GenerateReportRequest {
+
+  enum BaseReportType {
+    BALANCE_SHEET = 0;
+    PROFIT_LOSS = 1;
+    TX_REPORT = 2;
+  }
+
+  string ledgerId = 1;
+  BaseReportType baseReportType = 2;
+  string asOfDate = 3;
+  string beginDate = 4;
+  string endDate = 5;
+
+}
+
+message GenerateReportResponse {
+
+  message Status {
+    int64 code = 1;
+    string statusMessage = 2;
+  }
+  Status status = 1;
+  bytes encodedReport = 2;
+
+}
