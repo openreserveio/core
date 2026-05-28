@@ -1,0 +1,203 @@
+syntax = "proto3";
+
+option go_package = "/model";
+
+service CoreLedgerService {
+  rpc CreateLedger(CreateLedgerRequest) returns (CreateLedgerResponse);
+  rpc GetLedger(GetLedgerRequest) returns (GetLedgerResponse);
+  rpc PostLedgerTransaction(PostLedgerTransactionRequest) returns (PostLedgerTransactionResponse);
+  rpc GetLedgerTransaction(GetLedgerTransactionRequest) returns (GetLedgerTransactionResponse);
+  rpc GetLedgerAccountBalance(GetLedgerAccountBalanceRequest) returns (GetLedgerAccountBalanceResponse);
+  rpc CreateLedgerAccount(CreateLedgerAccountRequest) returns (CreateLedgerAccountResponse);
+  rpc GetLedgerAccount(GetLedgerAccountRequest) returns (GetLedgerAccountResponse);
+  rpc FindLedgerAccounts(FindLedgerAccountsRequest) returns (FindLedgerAccountsResponse);
+}
+
+
+message Status {
+  int64 code = 1;
+  string statusMessage = 2;
+}
+
+
+message CreateLedgerRequest {
+
+  string name = 1;
+  bool isSubledger = 2;
+  optional string parentLedgerId = 3;
+
+}
+
+message CreateLedgerResponse {
+
+  Status status = 1;
+  string ledgerId = 2;
+  string name = 3;
+
+}
+
+
+message GetLedgerRequest {
+  string ledgerId = 1;
+}
+
+message GetLedgerResponse {
+
+  Status status = 1;
+  string ledgerId = 2;
+  string name = 3;
+  bool isSubledger = 4;
+  optional string parentLedgerId = 5;
+
+}
+
+
+message PostLedgerTransactionRequest {
+
+  message Entry {
+    string accountId = 1;
+    int64 amount = 2;
+    string currency = 3;
+    map<string,string> metadata = 4;
+  }
+
+  string ledgerId = 1;
+  repeated Entry debits = 2;
+  repeated Entry credits = 3;
+  map<string,string> metadata = 4;
+
+}
+
+
+message PostLedgerTransactionResponse {
+
+  message Balance {
+    string accountId = 1;
+    string code = 2;
+    string class = 3;
+    string name = 4;
+    int64 balance = 5;
+  }
+
+  Status status = 1;
+  string ledgerId = 2;
+  string ledgerTransactionId = 3;
+  string postingDate = 4;
+  repeated Balance balances = 5;
+
+
+}
+
+
+message GetLedgerTransactionRequest {
+  string ledgerTransactionId = 1;
+  string ledgerId = 2;
+}
+
+message GetLedgerTransactionResponse {
+
+  message Entry {
+    string accountId = 1;
+    int64 amount = 2;
+  }
+
+  Status status = 1;
+  repeated Entry debits = 2;
+  repeated Entry credits = 3;
+  map<string,string> metadata = 4;
+  string transactionDate = 5;
+  string ledgerId = 6;
+
+}
+
+
+message GetLedgerAccountBalanceRequest {
+  string ledgerId = 1;
+  string accountId = 2;
+  optional string asOfDate = 3;
+}
+
+message GetLedgerAccountBalanceResponse {
+
+  Status status = 1;
+  string ledgerId = 2;
+  string accountId = 3;
+  string accountName = 4;
+  int64 balance = 5;
+  string balanceAsOfDate = 6;
+
+
+}
+
+message CreateLedgerAccountRequest {
+
+  string ledgerId = 1;
+  string name = 2;
+  string code = 3;
+  string class = 4;
+  map<string, string> metadata = 5;
+  string parentAccountId = 6;
+  string currency = 7;
+
+}
+
+message CreateLedgerAccountResponse {
+
+  Status status = 1;
+  string accountId = 2;
+  string ledgerId = 3;
+  string code = 4;
+  string name = 5;
+
+}
+
+message GetLedgerAccountRequest {
+  string ledgerId = 1;
+  string accountId = 2;
+  string code = 3;
+}
+
+message GetLedgerAccountResponse {
+  Status status = 1;
+  string accountId = 2;
+  string ledgerId = 3;
+  string code = 4;
+  string name = 5;
+  string class = 6;
+  map<string, string> metadata = 7;
+  string parentAccountId = 8;
+  string currency = 9;
+}
+
+message FindLedgerAccountsRequest {
+
+  enum CriteriaType {
+    BY_METADATA = 0;
+    ALL_IN_LEDGER = 1;
+  }
+
+  CriteriaType criteriaType = 1;
+  map<string, string> metadataCriteria = 2;
+  string ledgerId = 3;
+
+}
+
+message FindLedgerAccountsResponse {
+
+  message MatchedAccount {
+    string matchScore = 1;
+    string accountId = 2;
+    string ledgerId = 3;
+    string code = 4;
+    string name = 5;
+    string class = 6;
+    map<string, string> metadata = 7;
+    string parentAccountId = 8;
+    string currency = 9;
+  }
+
+  Status status = 1;
+  repeated MatchedAccount accounts = 2;
+
+}
+
