@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/openreserveio/core/core-ledger/generated/model"
 	ledgermodel "github.com/openreserveio/core/core-ledger/model"
-	"github.com/openreserveio/core/core-ledger/otel"
+	"github.com/openreserveio/core/core-util/otel"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
@@ -23,14 +23,14 @@ type CoreLedgerService struct {
 
 func NewCoreLedgerService(ctx context.Context, dbConnUrl string) (CoreLedgerService, error) {
 
-	ctx, sp := otel.Tracer.Start(ctx, "CoreLedgerService.NewCoreLedgerService")
-	defer sp.End()
+	ctx = otel.StartSpan(ctx, "CoreLedgerService.NewCoreLedgerService")
+	defer otel.EndSpan(ctx)
 
 	cls := CoreLedgerService{}
 
 	// EntityDB Connection Setup
 	// Using pgdriver (recommended)
-	sp.AddEvent("Setting up DB Connection")
+	otel.AddEvent("Setting up DB Connection")
 	dbConn := sql.OpenDB(pgdriver.NewConnector(
 		pgdriver.WithDSN(dbConnUrl),
 	))
