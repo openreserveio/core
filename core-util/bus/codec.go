@@ -1,11 +1,21 @@
 package bus
 
-import "encoding/json"
+import (
+	"context"
+	"encoding/json"
 
-func Encode(data interface{}) []byte {
+	"github.com/openreserveio/core/core-util/otel"
+)
 
+func Encode(ctx context.Context, data interface{}) []byte {
+
+	ctx = otel.StartSpan(ctx, "bus.Encode")
+	defer otel.EndSpan(ctx)
+
+	otel.AddEvent("Marshalling Data")
 	bytes, err := json.Marshal(data)
 	if err != nil {
+		otel.AddError("Error marshalling data", err)
 		return nil
 	}
 
@@ -13,8 +23,12 @@ func Encode(data interface{}) []byte {
 
 }
 
-func Decode(data []byte, target interface{}) error {
+func Decode(ctx context.Context, data []byte, target interface{}) error {
 
+	ctx = otel.StartSpan(ctx, "bus.Decode")
+	defer otel.EndSpan(ctx)
+
+	otel.AddEvent("Unmarshalling Data")
 	err := json.Unmarshal(data, target)
 	if err != nil {
 		return err

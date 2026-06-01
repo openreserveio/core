@@ -1,16 +1,22 @@
 package bus
 
 import (
+	"context"
+	"net/http"
+
 	"github.com/google/uuid"
 	"github.com/nats-io/nats.go/micro"
+	"github.com/openreserveio/core/core-util/otel"
 	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
-func Reply(request micro.Request, status int, responseData interface{}, err error) error {
+func Reply(ctx context.Context, request micro.Request, status int, responseData interface{}, err error) error {
+
+	otel.StartSpan(ctx, "bus.Reply")
+	defer otel.EndSpan(ctx)
 
 	// Encode Response data
-	responseBytes := Encode(responseData)
+	responseBytes := Encode(ctx, responseData)
 
 	// new bus message for error
 	busMessage := BusMessage{
@@ -23,9 +29,11 @@ func Reply(request micro.Request, status int, responseData interface{}, err erro
 		busMessage.ReplyStatusDetail = err.Error()
 	}
 
-	bmRaw := Encode(&busMessage)
+	bmRaw := Encode(ctx, &busMessage)
 
+	otel.AddEvent("Responding to request")
 	if err := request.Respond(bmRaw); err != nil {
+		otel.AddError("Error responding to request", err)
 		log.Error("Error responding: %v", err)
 		return err
 	}
@@ -34,10 +42,13 @@ func Reply(request micro.Request, status int, responseData interface{}, err erro
 
 }
 
-func ReplyOK(request micro.Request, responseData interface{}) error {
+func ReplyOK(ctx context.Context, request micro.Request, responseData interface{}) error {
+
+	otel.StartSpan(ctx, "bus.ReplyOK")
+	defer otel.EndSpan(ctx)
 
 	// Encode Response data
-	responseBytes := Encode(responseData)
+	responseBytes := Encode(ctx, responseData)
 
 	// new bus message for error
 	busMessage := BusMessage{
@@ -47,9 +58,10 @@ func ReplyOK(request micro.Request, responseData interface{}) error {
 		ReplyStatus:       http.StatusOK,
 		ReplyStatusDetail: "OK",
 	}
-	bmRaw := Encode(&busMessage)
+	bmRaw := Encode(ctx, &busMessage)
 
 	if err := request.Respond(bmRaw); err != nil {
+		otel.AddError("Error responding to request", err)
 		log.Error("Error responding: %v", err)
 		return err
 	}
@@ -58,7 +70,10 @@ func ReplyOK(request micro.Request, responseData interface{}) error {
 
 }
 
-func ReplyWithNotFound(request micro.Request) error {
+func ReplyWithNotFound(ctx context.Context, request micro.Request) error {
+
+	otel.StartSpan(ctx, "bus.ReplyWithNotFound")
+	defer otel.EndSpan(ctx)
 
 	// new bus message for error
 	errorBusMessage := BusMessage{
@@ -67,9 +82,10 @@ func ReplyWithNotFound(request micro.Request) error {
 		ReplyStatus:       http.StatusNotFound,
 		ReplyStatusDetail: "Not Found",
 	}
-	ebmRaw := Encode(&errorBusMessage)
+	ebmRaw := Encode(ctx, &errorBusMessage)
 
 	if err := request.Respond(ebmRaw); err != nil {
+		otel.AddError("Error responding to request", err)
 		log.Error("Error responding with error: %v", err)
 		return err
 	}
@@ -78,7 +94,10 @@ func ReplyWithNotFound(request micro.Request) error {
 
 }
 
-func ReplyWithSystemError(request micro.Request, sysErr error) error {
+func ReplyWithSystemError(ctx context.Context, request micro.Request, sysErr error) error {
+
+	otel.StartSpan(ctx, "bus.ReplyWithSystemError")
+	defer otel.EndSpan(ctx)
 
 	// new bus message for error
 	errorBusMessage := BusMessage{
@@ -88,7 +107,7 @@ func ReplyWithSystemError(request micro.Request, sysErr error) error {
 		ReplyStatus:       http.StatusInternalServerError,
 		ReplyStatusDetail: sysErr.Error(),
 	}
-	ebmRaw := Encode(&errorBusMessage)
+	ebmRaw := Encode(ctx, &errorBusMessage)
 
 	if err := request.Respond(ebmRaw); err != nil {
 		log.Error("Error responding with error: %v", err)
@@ -98,7 +117,10 @@ func ReplyWithSystemError(request micro.Request, sysErr error) error {
 	return nil
 }
 
-func ReplyWithBadRequestError(request micro.Request, badReqErr error) error {
+func ReplyWithBadRequestError(ctx context.Context, request micro.Request, badReqErr error) error {
+
+	otel.StartSpan(ctx, "bus.ReplyWithBadRequestError")
+	defer otel.EndSpan(ctx)
 
 	// new bus message for error
 	errorBusMessage := BusMessage{
@@ -108,9 +130,10 @@ func ReplyWithBadRequestError(request micro.Request, badReqErr error) error {
 		Data:              request.Data(),
 		ReplyStatusDetail: badReqErr.Error(),
 	}
-	ebmRaw := Encode(&errorBusMessage)
+	ebmRaw := Encode(ctx, &errorBusMessage)
 
 	if err := request.Respond(ebmRaw); err != nil {
+		otel.AddError("Error responding to request", err)
 		log.Error("Error responding with error: %v", err)
 		return err
 	}

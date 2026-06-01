@@ -1,16 +1,22 @@
 package bus
 
 import (
+	"context"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
+	"github.com/openreserveio/core/core-util/otel"
 	log "github.com/sirupsen/logrus"
-	"time"
 )
 
-func Send(busConn *BusConnection, subject string, data interface{}) error {
+func Send(ctx context.Context, busConn *BusConnection, subject string, data interface{}) error {
+
+	otel.StartSpan(ctx, "bus.Send")
+	defer otel.EndSpan(ctx)
 
 	// Encode Request data
-	dataBytes := Encode(data)
+	dataBytes := Encode(ctx, data)
 
 	// new bus message
 	busMessage := BusMessage{
@@ -18,9 +24,15 @@ func Send(busConn *BusConnection, subject string, data interface{}) error {
 		Data:    dataBytes,
 		IsReply: false,
 	}
-	bmRaw := Encode(&busMessage)
+	bmRaw := Encode(ctx, &busMessage)
 
-	if err := busConn.Conn.Publish(subject, bmRaw); err != nil {
+	// Create a NATS message and inject headers for OTEL
+	natsMsg := nats.NewMsg(subject)
+	otel.InjectNatsHeaders(ctx, natsMsg)
+	natsMsg.Data = bmRaw
+
+	if err := busConn.Conn.PublishMsg(natsMsg); err != nil {
+		otel.AddError("Error sending: %v", err)
 		log.Error("Error sending: %v", err)
 		return err
 	}
@@ -29,10 +41,13 @@ func Send(busConn *BusConnection, subject string, data interface{}) error {
 
 }
 
-func SendForReply(busConn *BusConnection, timeout time.Duration, subject string, messageData interface{}, replyMessage interface{}) error {
+func SendForReply(ctx context.Context, busConn *BusConnection, timeout time.Duration, subject string, messageData interface{}, replyMessage interface{}) error {
+
+	otel.StartSpan(ctx, "bus.SendForReply")
+	defer otel.EndSpan(ctx)
 
 	// Encode Request data
-	dataBytes := Encode(messageData)
+	dataBytes := Encode(ctx, messageData)
 
 	// new bus message
 	busMessage := BusMessage{
@@ -40,29 +55,34 @@ func SendForReply(busConn *BusConnection, timeout time.Duration, subject string,
 		Data:    dataBytes,
 		IsReply: true,
 	}
-	bmRaw := Encode(&busMessage)
+	bmRaw := Encode(ctx, &busMessage)
 
+	otel.AddEvent("Sending message for reply: %v", busMessage)
 	var err error
 	var rep *nats.Msg
 	if rep, err = busConn.Conn.Request(subject, bmRaw, timeout); err != nil {
+		otel.AddError("Error sending for reply: %v", err)
 		log.Error("Error sending for reply: %v", err)
 		return err
 	}
 
 	// Decode the reply
 	var replyBusMessage BusMessage
-	if err = Decode(rep.Data, &replyBusMessage); err != nil {
+	if err = Decode(ctx, rep.Data, &replyBusMessage); err != nil {
+		otel.AddError("Error decoding reply: %v", err)
 		log.Error("Error decoding reply: %v", err)
 		return err
 	}
 
 	// If reply msg is nil, no need to decode the data
 	if replyMessage == nil || replyBusMessage.Data == nil {
+		otel.AddEvent("Reply message was nil!")
 		return nil
 	}
 
 	// Decode the data in the reply
-	if err = Decode(replyBusMessage.Data, replyMessage); err != nil {
+	if err = Decode(ctx, replyBusMessage.Data, replyMessage); err != nil {
+		otel.AddError("Error decoding reply data: %v", err)
 		log.Error("Error decoding reply data: %v", err)
 		return err
 	}
