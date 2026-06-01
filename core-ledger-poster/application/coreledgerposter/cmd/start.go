@@ -38,7 +38,7 @@ Start the Core Ledger Service
 		ctx := context.Background()
 
 		log.Info("Starting Core Ledger Poster Service")
-		clps, err := service.NewCoreLedgerPosterService(nil, coreLedgerServiceConnectionUrl, natsConnectionUrl)
+		clps, err := service.NewCoreLedgerPosterService(ctx, coreLedgerServiceConnectionUrl, natsConnectionUrl)
 		if err != nil {
 			log.Fatalf("Unable to start Core Ledger Poster Service: %v", err)
 			os.Exit(1)

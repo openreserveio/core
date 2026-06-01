@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/openreserveio/core/core-ledger-poster/otel"
+	"github.com/openreserveio/core/core-util/otel"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"

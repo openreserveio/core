@@ -8,9 +8,9 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/nats-io/nats.go/micro"
 	"github.com/openreserveio/core/core-ledger-poster/application"
-	"github.com/openreserveio/core/core-ledger-poster/bus"
 	"github.com/openreserveio/core/core-ledger-poster/generated/model"
-	"github.com/openreserveio/core/core-ledger-poster/otel"
+	"github.com/openreserveio/core/core-util/bus"
+	"github.com/openreserveio/core/core-util/otel"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -41,7 +41,7 @@ func NewCoreLedgerPosterService(ctx context.Context, coreLedgerUrl string, busCo
 
 	// Setup Nats Service
 	// Bus Connection
-	busConn, err := bus.NewBusConnection(busConnUrl)
+	busConn, err := bus.NewBusConnection(ctx, busConnUrl)
 	if err != nil {
 		log.Error("Error creating bus connection: %v", err)
 		return nil, err
@@ -86,21 +86,21 @@ func (clps *CoreLedgerPosterService) ProcessMessage(request micro.Request) {
 	if err != nil {
 		log.Errorf("Error processing post ledger transaction request: %v", err)
 		otel.AddError("Error processing post ledger transaction request", err)
-		bus.ReplyWithBadRequestError(request, err)
+		bus.ReplyWithBadRequestError(ctx, request, err)
 		return
 	}
 
 	log.Infof("Posting ledger transaction")
 	otel.AddEvent("Posting ledger transaction")
-	response, err := clps.LedgerClient.PostLedgerTransaction(context.Background(), &postLedgerTxRequest)
+	response, err := clps.LedgerClient.PostLedgerTransaction(ctx, &postLedgerTxRequest)
 	if err != nil {
 		otel.AddError("Call to Core Ledger resulted in an error", err)
 		log.Fatalf("Call to Core Ledger resulted in an error:  %v", err)
-		bus.ReplyWithSystemError(request, err)
+		bus.ReplyWithSystemError(ctx, request, err)
 		return
 	}
 
 	otel.AddEvent("Ledger transaction posted, reply OK")
-	bus.ReplyOK(request, response)
+	bus.ReplyOK(ctx, request, response)
 
 }
