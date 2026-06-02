@@ -28,7 +28,7 @@ var rootCmd = &cobra.Command{
 func Execute(ctx context.Context) {
 
 	otelExporter := otel.NewExporter(ctx, otel.EXPORTER_TYPE_OTLP)
-	otel.NewTracerProvider("core-payments-fednow-inbound-payment-wfworker", otelExporter)
+	otel.NewTracerProvider("core-payments", otelExporter)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

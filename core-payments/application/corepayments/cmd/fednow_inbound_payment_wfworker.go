@@ -78,11 +78,12 @@ Workflow to manage the inbound processing of Fednow messages
 		defer c.Close()
 
 		// Create the Temporal worker
+		paymentActivity := activities.NewPaymentActivity(fednowInboundWorkflow.PaymentsDB)
 		w := worker.New(c, "fednow-inbound-payment-queue", worker.Options{})
 		w.RegisterWorkflow(fednowInboundWorkflow.ProcessFednowInboundPayment)
-		w.RegisterActivity(activities.StoreRawPaymentInstruction)
-		w.RegisterActivity(activities.ValidatePaymentInstruction)
-		w.RegisterActivity(activities.UpdatePaymentStatus)
+		w.RegisterActivity(paymentActivity.StoreRawPaymentInstruction)
+		w.RegisterActivity(paymentActivity.ValidatePaymentInstruction)
+		w.RegisterActivity(paymentActivity.UpdatePaymentStatus)
 
 		// Start the Worker
 		err = w.Run(worker.InterruptCh())

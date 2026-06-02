@@ -2,29 +2,19 @@ package connector
 
 import (
 	"context"
-	"database/sql"
-	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"github.com/moov-io/fednow20022/gen/pacs_008_001_08"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/jetstream"
 	"github.com/openreserveio/core/core-payments/generated/ftpmodel"
-	"github.com/openreserveio/core/core-payments/pmtmodel"
-	goflow "github.com/s8sg/goflow/v1"
+	"github.com/openreserveio/core/core-payments/service/workflows"
 	log "github.com/sirupsen/logrus"
 	"github.com/uptrace/bun"
-	"github.com/uptrace/bun/dialect/pgdialect"
-	"github.com/uptrace/bun/driver/pgdriver"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"go.temporal.io/sdk/client"
 )
 
 type FednowMessage struct {
@@ -34,27 +24,21 @@ type FednowMessage struct {
 }
 
 type FedNowConnectorConfig struct {
-	InboundStreamName        string
-	InboundSubject           string
-	OutboundStreamName       string
-	OutboundSubject          string
-	PaymentsDBUrl            string
-	NatsUrl                  string
-	ListenHost               string
-	ListenPort               string
-	RedisUrl                 string
-	IsFintechProgramAware    bool
-	FintechProgramServiceUrl string
-	DefaultLedgerId          string
+	InboundStreamName  string
+	InboundSubject     string
+	OutboundStreamName string
+	OutboundSubject    string
+	NatsUrl            string
+	TemporalUrl        string
 }
 
 type FedNowConnector struct {
 	Queue                jetstream.JetStream
 	PaymentsDB           *bun.DB
-	Gin                  *gin.Engine
 	Config               *FedNowConnectorConfig
 	Signal               chan FednowMessage
 	FintechProgramClient ftpmodel.FintechProgramServiceClient
+	TemporalClient       client.Client
 }
 
 func NewFedNowConnector(ctx context.Context, config *FedNowConnectorConfig) (*FedNowConnector, error) {
@@ -63,6 +47,15 @@ func NewFedNowConnector(ctx context.Context, config *FedNowConnectorConfig) (*Fe
 		Config: config,
 		Signal: make(chan FednowMessage, 1),
 	}
+
+	// Set up Temporal
+	temporalClient, err := client.Dial(client.Options{
+		HostPort: config.TemporalUrl,
+	})
+	if err != nil {
+		return nil, err
+	}
+	connector.TemporalClient = temporalClient
 
 	// Setup Jetstream
 	nc, err := nats.Connect(config.NatsUrl)
@@ -74,32 +67,6 @@ func NewFedNowConnector(ctx context.Context, config *FedNowConnectorConfig) (*Fe
 		return nil, err
 	}
 	connector.Queue = js
-
-	// Payments EntityDB
-	// EntityDB Connection Setup
-	// Using pgdriver (recommended)
-	dbConn := sql.OpenDB(pgdriver.NewConnector(
-		pgdriver.WithDSN(config.PaymentsDBUrl),
-	))
-	dbBun := bun.NewDB(dbConn, pgdialect.New())
-	connector.PaymentsDB = dbBun
-
-	// Fintech Program Service Client
-	if config.IsFintechProgramAware {
-		log.Infof("Setting up Fintech Program Service Client: %v", config.FintechProgramServiceUrl)
-		conn, err := grpc.NewClient(config.FintechProgramServiceUrl, grpc.WithTransportCredentials(insecure.NewCredentials()))
-		if err != nil {
-			log.Fatalf("Unable to connect to Core Fintech Program Service: %v", err)
-			os.Exit(1)
-		}
-		connector.FintechProgramClient = ftpmodel.NewFintechProgramServiceClient(conn)
-	} else {
-		log.Info("Fintech Program Service is not enabled.  Skipping setup.")
-	}
-
-	// Setup Gin
-	connector.Gin = gin.Default()
-	connector.Gin.POST("/fednow/outbound", connector.HandleOutboundPost)
 
 	return &connector, nil
 
@@ -113,62 +80,19 @@ func (fc *FedNowConnector) Start() error {
 	// Spin up Jetstream listeners
 	go fc.startJetstreamListeners(ctx, fc.Signal)
 
-	// Spin up Gin Server
-	go fc.startGinService(ctx, fc.Signal)
-
 	for {
 
 		log.Infof("Waiting for bidirectional messages")
 		msg := <-fc.Signal
 		switch msg.Direction {
 		case "INBOUND":
-			log.Infof("Received inbound message.  Persisting Payment")
-			paymentMessage, err := convertFednowMessageToPayment(msg.MessageContents)
+			log.Infof("Received inbound message, kicking off workflow")
+			wfrun, err := fc.TemporalClient.ExecuteWorkflow(ctx, client.StartWorkflowOptions{TaskQueue: "fednow-inbound-payment-queue"}, (&workflows.FednowInboundPaymentWorkflow{}).ProcessFednowInboundPayment, msg.MessageContents)
 			if err != nil {
-				log.Errorf("Failed to convert inbound message to Payment: %v", err)
+				log.Errorf("Error starting workflow: %v", err)
 				continue
 			}
-
-			log.Infof("Determining Ledger ID for Payment")
-			if fc.Config.IsFintechProgramAware {
-				determineLedgerIdFromFintechProgram(ctx, fc.FintechProgramClient, paymentMessage)
-			} else {
-				log.Infof("Fintech Program Service is not enabled.  Using default ledger ID: %v", fc.Config.DefaultLedgerId)
-				paymentMessage.LedgerID = fc.Config.DefaultLedgerId
-			}
-
-			_, err = fc.PaymentsDB.NewInsert().Model(paymentMessage).Exec(ctx)
-			if err != nil {
-				log.Errorf("Failed to insert payment: %v", err)
-				continue
-			}
-
-			paymentStatusHistory := pmtmodel.PaymentStatusHistory{
-				ID:            uuid.NewString(),
-				PaymentID:     paymentMessage.ID,
-				PaymentStatus: pmtmodel.PAYMENT_STATUS_INSTRUCTION_RECEIVED,
-				StatusDetail:  "Payment Instruction Received via Fednow Queue",
-				CreateDate:    time.Now(),
-			}
-			_, err = fc.PaymentsDB.NewInsert().Model(&paymentStatusHistory).Exec(ctx)
-			if err != nil {
-				log.Errorf("Failed to insert payment status history: %v", err)
-				continue
-			}
-
-			log.Infof("Kicking off Fednow Inbound Payment Workflow")
-			pmtJson, _ := json.Marshal(paymentMessage)
-			fs := &goflow.FlowService{RedisURL: fc.Config.RedisUrl}
-			fs.Execute("fednow-inbound-payment-workflows", &goflow.Request{
-				Body: pmtJson,
-				Header: map[string][]string{
-					"header-key":  []string{"header-value"},
-					"header2_key": []string{"header2-value"}},
-				Query: map[string][]string{
-					"query-key":     []string{"query-value"},
-					"query_key-two": []string{"query-value-two"},
-				},
-			})
+			log.Infof("Workflow started: %s", wfrun.GetID())
 
 		case "OUTBOUND":
 			log.Infof("Received outbound message.  Routing to Jetstream Stream!")
@@ -195,13 +119,6 @@ func (fc *FedNowConnector) HandleOutboundPost(ctx *gin.Context) {
 
 	fc.Signal <- FednowMessage{Direction: "OUTBOUND", MessageContents: body}
 
-}
-
-func (fc *FedNowConnector) startGinService(ctx context.Context, signal chan FednowMessage) {
-	err := fc.Gin.Run(fmt.Sprintf("%s:%s", fc.Config.ListenHost, fc.Config.ListenPort))
-	if err != nil {
-		os.Exit(1)
-	}
 }
 
 func (fc *FedNowConnector) startJetstreamListeners(ctx context.Context, signal chan FednowMessage) {
@@ -263,50 +180,5 @@ func (fc *FedNowConnector) startJetstreamListeners(ctx context.Context, signal c
 		msg.Ack()
 
 	}
-
-}
-
-func convertFednowMessageToPayment(msg []byte) (*pmtmodel.Payment, error) {
-
-	var fedNowMessage pacs_008_001_08.Document
-	err := xml.Unmarshal(msg, &fedNowMessage)
-	if err != nil {
-		log.Errorf("Error unmarshalling FedNow Message: %v", err)
-		return nil, err
-	}
-
-	sourceAmountFloat, err := strconv.ParseFloat(string(fedNowMessage.FIToFICstmrCdtTrf.CdtTrfTxInf[0].IntrBkSttlmAmt.Text), 64)
-	if err != nil {
-		log.Errorf("Error converting FedNow Message: %v", err)
-		return nil, err
-	}
-	sourceAmount := int64(sourceAmountFloat * 100)
-
-	settlementDate := time.Time(*fedNowMessage.FIToFICstmrCdtTrf.CdtTrfTxInf[0].IntrBkSttlmDt)
-
-	pmt := pmtmodel.Payment{
-		ID:                          uuid.NewString(),
-		PaymentNetworkID:            pmtmodel.PAYMENT_NETWORK_US_FEDNOW,
-		ServiceSpecificID:           uuid.NewString(),
-		NetworkIdentifier:           string(fedNowMessage.FIToFICstmrCdtTrf.CdtTrfTxInf[0].PmtId.EndToEndId),
-		CurrentPaymentStatus:        pmtmodel.PAYMENT_STATUS_INSTRUCTION_RECEIVED,
-		SourceCurrency:              string(fedNowMessage.FIToFICstmrCdtTrf.CdtTrfTxInf[0].IntrBkSttlmAmt.Ccy),
-		TargetCurrency:              string(fedNowMessage.FIToFICstmrCdtTrf.CdtTrfTxInf[0].IntrBkSttlmAmt.Ccy),
-		SourceAmount:                sourceAmount,
-		TargetAmount:                sourceAmount,
-		PaymentMessage:              msg,
-		UltimateOriginatorEntityID:  "",
-		UltimateBeneficiaryEntityID: "",
-		CreateDate:                  time.Now(),
-		EffectiveDate:               settlementDate,
-		ModifyDate:                  time.Now(),
-		IsBatch:                     false,
-		ParentPaymentID:             "",
-	}
-	return &pmt, nil
-
-}
-
-func determineLedgerIdFromFintechProgram(ctx context.Context, client ftpmodel.FintechProgramServiceClient, payment *pmtmodel.Payment) {
 
 }

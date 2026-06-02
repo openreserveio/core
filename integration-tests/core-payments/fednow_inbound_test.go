@@ -20,7 +20,7 @@ var _ = Describe("FednowInbound", func() {
 
 	BeforeEach(func() {
 
-		nc, _ := nats.Connect("localhost:4422")
+		nc, _ := nats.Connect("localhost:4222")
 		js, _ = jetstream.New(nc)
 
 	})

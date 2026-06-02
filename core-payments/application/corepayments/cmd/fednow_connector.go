@@ -18,22 +18,11 @@ var ftpServiceUrl string
 
 func init() {
 
-	fednowConnectorCmd.PersistentFlags().StringVar(&defaultLedgerId, "defaultledgerid", "", "")
-	fednowConnectorCmd.PersistentFlags().StringVar(&paymentsDbUrl, "paymentsdburl", "", "Example for Postgres: postgresql://finsorbuser:finsorbpass@localhost:5432/paymentsdb?sslmode=disable")
 	fednowConnectorCmd.PersistentFlags().StringVar(&busConnUrl, "busconnurl", "", "nats://localhost:4322")
-	fednowConnectorCmd.PersistentFlags().StringVar(&listenHost, "listenHost", "", "0.0.0.0")
-	fednowConnectorCmd.PersistentFlags().StringVar(&listenPort, "listenPort", "", "4083")
-	fednowConnectorCmd.PersistentFlags().StringVar(&redisUrl, "redisurl", "", "localhost:6379")
-	fednowConnectorCmd.PersistentFlags().BoolVar(&isFintechProgramsAware, "ftpaware", false, "true or false, indicates whether the connector should be aware of Fintech Programs")
 	fednowConnectorCmd.PersistentFlags().StringVar(&ftpServiceUrl, "ftpserviceurl", "", "localhost:6379")
 
-	fednowConnectorCmd.MarkPersistentFlagRequired("defaultledgerid")
-	fednowConnectorCmd.MarkPersistentFlagRequired("paymentsdburl")
 	fednowConnectorCmd.MarkPersistentFlagRequired("busconnurl")
-	fednowConnectorCmd.MarkPersistentFlagRequired("redisurl")
-	fednowConnectorCmd.MarkPersistentFlagRequired("listenPort")
-	fednowConnectorCmd.MarkPersistentFlagRequired("listenPort")
-
+	
 	rootCmd.AddCommand(fednowConnectorCmd)
 
 }
@@ -48,18 +37,11 @@ Connects to the Fednow Gateway and listens for payments events, while also sendi
 
 		log.Info("Starting Fednow Connector Service")
 		config := connector.FedNowConnectorConfig{
-			NatsUrl:                  busConnUrl,
-			ListenHost:               listenHost,
-			ListenPort:               listenPort,
-			PaymentsDBUrl:            paymentsDbUrl,
-			InboundStreamName:        "FEDNOWIN",
-			InboundSubject:           "inbound",
-			OutboundStreamName:       "FEDNOWOUT",
-			OutboundSubject:          "outbound",
-			RedisUrl:                 redisUrl,
-			IsFintechProgramAware:    isFintechProgramsAware,
-			FintechProgramServiceUrl: ftpServiceUrl,
-			DefaultLedgerId:          defaultLedgerId,
+			NatsUrl:            busConnUrl,
+			InboundStreamName:  "FEDNOWIN",
+			InboundSubject:     "inbound",
+			OutboundStreamName: "FEDNOWOUT",
+			OutboundSubject:    "outbound",
 		}
 
 		fednowConnector, err := connector.NewFedNowConnector(context.Background(), &config)

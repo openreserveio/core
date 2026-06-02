@@ -90,7 +90,7 @@ func NewFednowInboundPaymentWorkflow(ctx context.Context, paymentsdbUrl string, 
 	return &fednowInboundWF
 }
 
-func (wf *FednowInboundPaymentWorkflow) ProcessFednowInboundPayment(ctx workflow.Context, rawPaymentInstruction any) (string, error) {
+func (wf *FednowInboundPaymentWorkflow) ProcessFednowInboundPayment(ctx workflow.Context, rawPaymentInstruction []byte) (string, error) {
 
 	ao := workflow.ActivityOptions{
 		StartToCloseTimeout: 2 * time.Minute,
@@ -109,12 +109,17 @@ func (wf *FednowInboundPaymentWorkflow) ProcessFednowInboundPayment(ctx workflow
 	 */
 
 	var payment pmtmodel.Payment
-	err := workflow.ExecuteActivity(ctx, activities.StoreRawPaymentInstruction, wf.PaymentsDB, rawPaymentInstruction).Get(ctx, &payment)
+	err := workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).StoreRawPaymentInstruction, rawPaymentInstruction).Get(ctx, &payment)
 	if err != nil {
 		return "", err
 	}
 
-	err = workflow.ExecuteActivity(ctx, activities.ValidatePaymentInstruction, wf.PaymentsDB, payment).Get(ctx, &payment)
+	err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).ValidatePaymentInstruction, payment).Get(ctx, &payment)
+	if err != nil {
+		return "", err
+	}
+
+	err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).UpdatePaymentStatus, payment, pmtmodel.PAYMENT_STATUS_PROCESSING).Get(ctx, &payment)
 	if err != nil {
 		return "", err
 	}
