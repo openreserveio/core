@@ -11,6 +11,8 @@ volumes:
     driver: local
   nats_three:
     driver: local
+  temporal-data:
+    driver: local
 
 services:
   #############################################
@@ -65,6 +67,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
   pg_coreledger:
     container_name: db
     image: postgres:latest
@@ -120,3 +123,14 @@ services:
     volumes:
       - "./nats-config/nats_three:/etc/nats"
       - "nats_three:/etc/storage"
+
+  # Temporal Infra
+  temporal:
+    image: temporalio/temporal:latest
+    container_name: temporal
+    ports:
+      - 7233:7233
+      - 8233:8233
+    volumes:
+      - temporal-data:/home/temporal
+    command: server start-dev --ip 0.0.0.0 --db-filename /home/temporal/temporal.db
