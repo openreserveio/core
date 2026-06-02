@@ -25,8 +25,8 @@ type CoreLedgerPosterService struct {
 
 func NewCoreLedgerPosterService(ctx context.Context, coreLedgerUrl string, busConnUrl string) (*CoreLedgerPosterService, error) {
 
-	ctx = otel.StartSpan(ctx, "CoreLedgerPosterService.NewCoreLedgerPosterService")
-	defer otel.EndSpan(ctx)
+	ctx, st := otel.StartSpan(ctx, "CoreLedgerPosterService.NewCoreLedgerPosterService")
+	defer otel.EndSpan(ctx, st)
 
 	clpService := CoreLedgerPosterService{}
 	clpService.BusConnUrl = busConnUrl
@@ -76,31 +76,31 @@ func (clps *CoreLedgerPosterService) Start(ctx context.Context) error {
 func (clps *CoreLedgerPosterService) ProcessMessage(request micro.Request) {
 
 	ctx := otel.ExtractNatsContext(request)
-	ctx = otel.StartSpan(ctx, "CoreLedgerPosterService.ProcessMessage")
-	defer otel.EndSpan(ctx)
+	ctx, st := otel.StartSpan(ctx, "CoreLedgerPosterService.ProcessMessage")
+	defer otel.EndSpan(ctx, st)
 
 	log.Infof("Processing message")
-	otel.AddEvent("Processing message")
+	otel.AddEvent(st, "Processing message")
 	var postLedgerTxRequest model.PostLedgerTransactionRequest
 	err := bus.Receive(request, &postLedgerTxRequest)
 	if err != nil {
 		log.Errorf("Error processing post ledger transaction request: %v", err)
-		otel.AddError("Error processing post ledger transaction request", err)
+		otel.AddError(st, "Error processing post ledger transaction request", err)
 		bus.ReplyWithBadRequestError(ctx, request, err)
 		return
 	}
 
 	log.Infof("Posting ledger transaction")
-	otel.AddEvent("Posting ledger transaction")
+	otel.AddEvent(st, "Posting ledger transaction")
 	response, err := clps.LedgerClient.PostLedgerTransaction(ctx, &postLedgerTxRequest)
 	if err != nil {
-		otel.AddError("Call to Core Ledger resulted in an error", err)
+		otel.AddError(st, "Call to Core Ledger resulted in an error", err)
 		log.Fatalf("Call to Core Ledger resulted in an error:  %v", err)
 		bus.ReplyWithSystemError(ctx, request, err)
 		return
 	}
 
-	otel.AddEvent("Ledger transaction posted, reply OK")
+	otel.AddEvent(st, "Ledger transaction posted, reply OK")
 	bus.ReplyOK(ctx, request, response)
 
 }

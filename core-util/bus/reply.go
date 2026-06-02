@@ -12,8 +12,8 @@ import (
 
 func Reply(ctx context.Context, request micro.Request, status int, responseData interface{}, err error) error {
 
-	otel.StartSpan(ctx, "bus.Reply")
-	defer otel.EndSpan(ctx)
+	ctx, st := otel.StartSpan(ctx, "bus.Reply")
+	defer otel.EndSpan(ctx, st)
 
 	// Encode Response data
 	responseBytes := Encode(ctx, responseData)
@@ -31,9 +31,9 @@ func Reply(ctx context.Context, request micro.Request, status int, responseData 
 
 	bmRaw := Encode(ctx, &busMessage)
 
-	otel.AddEvent("Responding to request")
+	otel.AddEvent(st, "Responding to request")
 	if err := request.Respond(bmRaw); err != nil {
-		otel.AddError("Error responding to request", err)
+		otel.AddError(st, "Error responding to request", err)
 		log.Error("Error responding: %v", err)
 		return err
 	}
@@ -44,8 +44,8 @@ func Reply(ctx context.Context, request micro.Request, status int, responseData 
 
 func ReplyOK(ctx context.Context, request micro.Request, responseData interface{}) error {
 
-	otel.StartSpan(ctx, "bus.ReplyOK")
-	defer otel.EndSpan(ctx)
+	ctx, st := otel.StartSpan(ctx, "bus.ReplyOK")
+	defer otel.EndSpan(ctx, st)
 
 	// Encode Response data
 	responseBytes := Encode(ctx, responseData)
@@ -61,7 +61,7 @@ func ReplyOK(ctx context.Context, request micro.Request, responseData interface{
 	bmRaw := Encode(ctx, &busMessage)
 
 	if err := request.Respond(bmRaw); err != nil {
-		otel.AddError("Error responding to request", err)
+		otel.AddError(st, "Error responding to request", err)
 		log.Error("Error responding: %v", err)
 		return err
 	}
@@ -72,8 +72,8 @@ func ReplyOK(ctx context.Context, request micro.Request, responseData interface{
 
 func ReplyWithNotFound(ctx context.Context, request micro.Request) error {
 
-	otel.StartSpan(ctx, "bus.ReplyWithNotFound")
-	defer otel.EndSpan(ctx)
+	ctx, st := otel.StartSpan(ctx, "bus.ReplyWithNotFound")
+	defer otel.EndSpan(ctx, st)
 
 	// new bus message for error
 	errorBusMessage := BusMessage{
@@ -85,7 +85,7 @@ func ReplyWithNotFound(ctx context.Context, request micro.Request) error {
 	ebmRaw := Encode(ctx, &errorBusMessage)
 
 	if err := request.Respond(ebmRaw); err != nil {
-		otel.AddError("Error responding to request", err)
+		otel.AddError(st, "Error responding to request", err)
 		log.Error("Error responding with error: %v", err)
 		return err
 	}
@@ -96,8 +96,8 @@ func ReplyWithNotFound(ctx context.Context, request micro.Request) error {
 
 func ReplyWithSystemError(ctx context.Context, request micro.Request, sysErr error) error {
 
-	otel.StartSpan(ctx, "bus.ReplyWithSystemError")
-	defer otel.EndSpan(ctx)
+	ctx, st := otel.StartSpan(ctx, "bus.ReplyWithSystemError")
+	defer otel.EndSpan(ctx, st)
 
 	// new bus message for error
 	errorBusMessage := BusMessage{
@@ -119,8 +119,8 @@ func ReplyWithSystemError(ctx context.Context, request micro.Request, sysErr err
 
 func ReplyWithBadRequestError(ctx context.Context, request micro.Request, badReqErr error) error {
 
-	otel.StartSpan(ctx, "bus.ReplyWithBadRequestError")
-	defer otel.EndSpan(ctx)
+	ctx, st := otel.StartSpan(ctx, "bus.ReplyWithBadRequestError")
+	defer otel.EndSpan(ctx, st)
 
 	// new bus message for error
 	errorBusMessage := BusMessage{
@@ -133,7 +133,7 @@ func ReplyWithBadRequestError(ctx context.Context, request micro.Request, badReq
 	ebmRaw := Encode(ctx, &errorBusMessage)
 
 	if err := request.Respond(ebmRaw); err != nil {
-		otel.AddError("Error responding to request", err)
+		otel.AddError(st, "Error responding to request", err)
 		log.Error("Error responding with error: %v", err)
 		return err
 	}

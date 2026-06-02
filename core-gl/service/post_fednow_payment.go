@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/openreserveio/core/core-gl/bus"
 	"github.com/openreserveio/core/core-gl/generated/glmodel"
 	"github.com/openreserveio/core/core-gl/generated/model"
 	glmodelint "github.com/openreserveio/core/core-gl/glmodel"
+	"github.com/openreserveio/core/core-util/bus"
 	log "github.com/sirupsen/logrus"
 )
 

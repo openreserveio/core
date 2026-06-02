@@ -23,14 +23,14 @@ type CoreLedgerService struct {
 
 func NewCoreLedgerService(ctx context.Context, dbConnUrl string) (CoreLedgerService, error) {
 
-	ctx = otel.StartSpan(ctx, "CoreLedgerService.NewCoreLedgerService")
-	defer otel.EndSpan(ctx)
+	ctx, st := otel.StartSpan(ctx, "CoreLedgerService.NewCoreLedgerService")
+	defer otel.EndSpan(ctx, st)
 
 	cls := CoreLedgerService{}
 
 	// EntityDB Connection Setup
 	// Using pgdriver (recommended)
-	otel.AddEvent("Setting up DB Connection")
+	otel.AddEvent(st, "Setting up DB Connection")
 	dbConn := sql.OpenDB(pgdriver.NewConnector(
 		pgdriver.WithDSN(dbConnUrl),
 	))
@@ -42,8 +42,8 @@ func NewCoreLedgerService(ctx context.Context, dbConnUrl string) (CoreLedgerServ
 
 func (cls CoreLedgerService) CreateLedger(ctx context.Context, request *model.CreateLedgerRequest) (*model.CreateLedgerResponse, error) {
 
-	ctx = otel.StartSpan(ctx, "CoreLedgerService.CreateLedger")
-	defer otel.EndSpan(ctx)
+	ctx, st := otel.StartSpan(ctx, "CoreLedgerService.CreateLedger")
+	defer otel.EndSpan(ctx, st)
 
 	var parentLedger string
 	var parentLedgerValid bool
@@ -62,13 +62,13 @@ func (cls CoreLedgerService) CreateLedger(ctx context.Context, request *model.Cr
 		ParentLedgerID: sql.NullString{String: parentLedger, Valid: parentLedgerValid},
 	}
 
-	otel.AddEvent("Creating Ledger")
+	otel.AddEvent(st, "Creating Ledger")
 	createdLedger, err := CreateLedger(ctx, cls.DB, &ledger)
 	if err != nil {
 		response := model.CreateLedgerResponse{
 			Status: &model.Status{Code: http.StatusInternalServerError, StatusMessage: err.Error()},
 		}
-		otel.AddEvent("Ledger creation failed: %s", err.Error())
+		otel.AddError(st, "Error creating ledger", err)
 		return &response, err
 	}
 
@@ -78,24 +78,24 @@ func (cls CoreLedgerService) CreateLedger(ctx context.Context, request *model.Cr
 		LedgerId: createdLedger.ID,
 	}
 
-	otel.AddEvent("Ledger created!")
+	otel.AddEvent(st, "Ledger created!")
 	return &response, nil
 
 }
 
 func (cls CoreLedgerService) GetLedger(ctx context.Context, request *model.GetLedgerRequest) (*model.GetLedgerResponse, error) {
 
-	ctx = otel.StartSpan(ctx, "CoreLedgerService.GetLedger")
-	defer otel.EndSpan(ctx)
+	ctx, st := otel.StartSpan(ctx, "CoreLedgerService.GetLedger")
+	defer otel.EndSpan(ctx, st)
 
-	otel.AddEvent("Fetching Ledger: %s", request.LedgerId)
+	otel.AddEvent(st, "Fetching Ledger: %s", request.LedgerId)
 	ledger, err := GetLedger(ctx, cls.DB, request.LedgerId)
 	if err != nil {
 		response := model.GetLedgerResponse{
 			Status: &model.Status{Code: http.StatusInternalServerError, StatusMessage: err.Error()},
 		}
 
-		otel.AddEvent("Ledger fetch failed: %s", err.Error())
+		otel.AddError(st, "Ledger fetch failed", err)
 		return &response, err
 	}
 
@@ -120,6 +120,9 @@ func (cls CoreLedgerService) GetLedger(ctx context.Context, request *model.GetLe
 
 func (cls CoreLedgerService) PostLedgerTransaction(ctx context.Context, request *model.PostLedgerTransactionRequest) (*model.PostLedgerTransactionResponse, error) {
 
+	ctx, st := otel.StartSpan(ctx, "CoreLedgerService.PostLedgerTransaction")
+	defer otel.EndSpan(ctx, st)
+
 	// setup domain objects
 	var response model.PostLedgerTransactionResponse
 	var debits []ledgermodel.LedgerTransactionEntry
@@ -132,6 +135,8 @@ func (cls CoreLedgerService) PostLedgerTransaction(ctx context.Context, request 
 			Metadata:  ConvertMapStringToMapInterface(entry.Metadata),
 		}
 		debits = append(debits, en)
+		otel.AddEvent(st, "Debit: %s - %s %d", entry.AccountId, entry.Currency, entry.Amount)
+		otel.AddEvent(st, "Debit Metadata: %v", entry.Metadata)
 	}
 
 	for _, entry := range request.Credits {
@@ -142,14 +147,19 @@ func (cls CoreLedgerService) PostLedgerTransaction(ctx context.Context, request 
 			Metadata:  ConvertMapStringToMapInterface(entry.Metadata),
 		}
 		credits = append(credits, en)
+		otel.AddEvent(st, "Credit: %s - %s %d", entry.AccountId, entry.Currency, entry.Amount)
+		otel.AddEvent(st, "Credit Metadata: %v", entry.Metadata)
 	}
 
+	otel.AddEvent(st, "Posting Ledger Transaction")
 	tx, balances, err := PostLedgerTransaction(ctx, cls.DB, request.LedgerId, debits, credits, ConvertMapStringToMapInterface(request.Metadata))
 	if err != nil {
+		otel.AddError(st, "Error posting ledger transaction", err)
 		response.Status = &model.Status{Code: http.StatusBadRequest, StatusMessage: err.Error()}
 		return &response, nil
 	}
 
+	otel.AddEvent(st, "Ledger Transaction Posted")
 	response.LedgerTransactionId = tx.ID
 	response.LedgerId = tx.LedgerID
 	response.PostingDate = tx.TransactionDate.String()
@@ -163,6 +173,7 @@ func (cls CoreLedgerService) PostLedgerTransaction(ctx context.Context, request 
 			Balance:   bal.Balance,
 		}
 		response.Balances = append(response.Balances, &newBal)
+		otel.AddEvent(st, "Balance: %s - %s %d", newBal.AccountId, newBal.Name, newBal.Balance)
 	}
 
 	response.Status = &model.Status{Code: http.StatusOK}
@@ -172,18 +183,25 @@ func (cls CoreLedgerService) PostLedgerTransaction(ctx context.Context, request 
 
 func (cls CoreLedgerService) GetLedgerTransaction(ctx context.Context, request *model.GetLedgerTransactionRequest) (*model.GetLedgerTransactionResponse, error) {
 
+	ctx, st := otel.StartSpan(ctx, "CoreLedgerService.GetLedgerTransaction")
+	defer otel.EndSpan(ctx, st)
+
 	response := model.GetLedgerTransactionResponse{}
 
+	otel.AddEvent(st, "Retrieving Transaction in ledger (%s) - TXID: %s", request.LedgerId, request.LedgerTransactionId)
 	ledgerTx, err := GetLedgerTransaction(ctx, cls.DB, request.LedgerId, request.LedgerTransactionId)
 	if err != nil {
+		otel.AddError(st, "Error retrieving ledger transaction", err)
 		response.Status = &model.Status{Code: http.StatusInternalServerError, StatusMessage: err.Error()}
 		return &response, nil
 	}
 	if ledgerTx == nil {
+		otel.AddEvent(st, "Ledger Transaction not found")
 		response.Status = &model.Status{Code: http.StatusNotFound, StatusMessage: fmt.Sprintf("ledger transaction not found: %s", request.LedgerTransactionId)}
 		return &response, nil
 	}
 
+	otel.AddEvent(st, "Transaction retrieved successfully")
 	response.LedgerId = ledgerTx.LedgerID
 	response.Metadata = ConvertMapInterfaceToMapString(ledgerTx.Metadata)
 
@@ -192,6 +210,7 @@ func (cls CoreLedgerService) GetLedgerTransaction(ctx context.Context, request *
 			AccountId: entry.AccountID,
 			Amount:    entry.Amount,
 		})
+		otel.AddEvent(st, "Debit: %s - %d", entry.AccountID, entry.Amount)
 	}
 
 	for _, entry := range ledgerTx.Credits {
@@ -199,6 +218,7 @@ func (cls CoreLedgerService) GetLedgerTransaction(ctx context.Context, request *
 			AccountId: entry.AccountID,
 			Amount:    entry.Amount,
 		})
+		otel.AddEvent(st, "Credit: %s - %d", entry.AccountID, entry.Amount)
 	}
 
 	response.Status = &model.Status{Code: http.StatusOK}

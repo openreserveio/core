@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/openreserveio/core/core-util/otel"
 	"github.com/spf13/cobra"
 
 	log "github.com/sirupsen/logrus"
@@ -25,6 +26,10 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute(ctx context.Context) {
+
+	otelExporter := otel.NewExporter(ctx, otel.EXPORTER_TYPE_OTLP)
+	otel.NewTracerProvider("core-gl", otelExporter)
+
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

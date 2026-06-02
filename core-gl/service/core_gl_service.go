@@ -9,10 +9,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/openreserveio/core/core-gl/bus"
 	"github.com/openreserveio/core/core-gl/generated/glmodel"
 	"github.com/openreserveio/core/core-gl/generated/model"
 	glmodelint "github.com/openreserveio/core/core-gl/glmodel"
+	"github.com/openreserveio/core/core-util/bus"
+	"github.com/openreserveio/core/core-util/otel"
 	log "github.com/sirupsen/logrus"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
@@ -30,11 +31,17 @@ type CoreGLService struct {
 
 func NewCoreGLService(entityDbUrl string, busconnurl string, coreLedgerUrl string, listenHost string, listenPort string) (*CoreGLService, error) {
 
+	ctx := context.Background()
+	ctx, st := otel.StartSpan(ctx, "CoreGLService.NewCoreGLService")
+	defer otel.EndSpan(ctx, st)
+
 	coreGL := CoreGLService{}
 
 	// Bus
-	busConn, err := bus.NewBusConnection(busconnurl)
+	otel.AddEvent(st, "Setting up Bus Connection")
+	busConn, err := bus.NewBusConnection(ctx, busconnurl)
 	if err != nil {
+		otel.AddError(st, "Error creating bus connection", err)
 		log.Error("Error creating bus connection: %v", err)
 		return nil, err
 	}
@@ -43,6 +50,7 @@ func NewCoreGLService(entityDbUrl string, busconnurl string, coreLedgerUrl strin
 	// EntityDB
 	// EntityDB Connection Setup
 	// Using pgdriver (recommended)
+	otel.AddEvent(st, "Setting up DB Connection")
 	dbConn := sql.OpenDB(pgdriver.NewConnector(
 		pgdriver.WithDSN(entityDbUrl),
 	))
@@ -50,8 +58,10 @@ func NewCoreGLService(entityDbUrl string, busconnurl string, coreLedgerUrl strin
 	coreGL.EntityDB = dbBun
 
 	// Setup Core Ledger Service
+	otel.AddEvent(st, "Setting up Core Ledger Service")
 	conn, err := grpc.NewClient(coreLedgerUrl, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
+		otel.AddError(st, "Error creating Core Ledger Client", err)
 		log.Fatalf("Unable to connect to Core Ledger: %v", err)
 		os.Exit(1)
 	}

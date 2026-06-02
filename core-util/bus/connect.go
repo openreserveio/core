@@ -15,16 +15,16 @@ type BusConnection struct {
 
 func NewBusConnection(ctx context.Context, connUrl string) (*BusConnection, error) {
 
-	ctx = otel.StartSpan(ctx, "bus.NewBusConnection")
-	defer otel.EndSpan(ctx)
+	ctx, st := otel.StartSpan(ctx, "bus.NewBusConnection")
+	defer otel.EndSpan(ctx, st)
 
 	nc, err := nats.Connect(connUrl)
 	if err != nil {
-		otel.AddError("Error connecting to NATS bus", err)
+		otel.AddError(st, "Error connecting to NATS bus", err)
 		log.Error("Error connecting to NATS bus:  %v", err)
 		return nil, err
 	}
 
-	otel.AddEvent("Connected to NATS bus")
+	otel.AddEvent(st, "Connected to NATS bus")
 	return &BusConnection{Conn: nc, ConnUrl: connUrl}, nil
 }

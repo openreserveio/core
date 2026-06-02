@@ -3,4 +3,4 @@ generate-grpc:
 
 
 dockerize:
-	docker build -f application/coreledger/docker/Dockerfile -t finsorb/coreledger .
+	docker build -f application/coreledger/docker/Dockerfile -t openreserveio/coreledger .

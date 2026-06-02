@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/openreserveio/core/core-gl/application"
-	"github.com/openreserveio/core/core-gl/bus"
 	"github.com/openreserveio/core/core-gl/generated/glmodel"
 	"github.com/openreserveio/core/core-gl/generated/model"
 	glmodelint "github.com/openreserveio/core/core-gl/glmodel"
+	"github.com/openreserveio/core/core-util/bus"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -75,7 +75,7 @@ func PostJournalEntry(ctx context.Context, busConn *bus.BusConnection, coreLedge
 
 	// Post the transaction - this goes to the bus
 	response := model.PostLedgerTransactionResponse{}
-	err := bus.SendForReply(busConn, 10*time.Second, fmt.Sprintf("%s.%s", application.SERVICE_NAME_CORE_LEDGER_POSTER, application.SERVICE_ENDPOINT_POST_TRANSACTION), &request, &response)
+	err := bus.SendForReply(ctx, busConn, 10*time.Second, fmt.Sprintf("%s.%s", application.SERVICE_NAME_CORE_LEDGER_POSTER, application.SERVICE_ENDPOINT_POST_TRANSACTION), &request, &response)
 	if err != nil {
 		log.Errorf("Error posting journal entry: %v", err)
 		return "", err

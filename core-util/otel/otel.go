@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/micro"
 	"go.opentelemetry.io/contrib/exporters/autoexport"
@@ -21,32 +22,40 @@ const (
 	EXPORTER_TYPE_OTLP    = "otlp"
 )
 
+type SpanToken string
+
 var Tracer trace.Tracer
-var currentSpan trace.Span
+var currentSpans map[SpanToken]trace.Span
 
-func StartSpan(ctx context.Context, spanName string) context.Context {
+func StartSpan(ctx context.Context, spanName string) (context.Context, SpanToken) {
 	newCtx, sp := Tracer.Start(ctx, spanName)
-	currentSpan = sp
-	return newCtx
+
+	if currentSpans == nil {
+		currentSpans = make(map[SpanToken]trace.Span)
+	}
+	spanId := SpanToken(uuid.NewString())
+	currentSpans[spanId] = sp
+
+	return newCtx, spanId
 }
 
-func EndSpan(ctx context.Context) {
-	currentSpan.End()
-	currentSpan = nil
+func EndSpan(ctx context.Context, spanToken SpanToken) {
+	currentSpans[spanToken].End()
+	currentSpans[spanToken] = nil
 }
 
-func AddEvent(eventName string, vars ...interface{}) {
+func AddEvent(spanToken SpanToken, eventName string, vars ...interface{}) {
 	message := fmt.Sprintf(eventName, vars...)
-	currentSpan.AddEvent(message)
+	currentSpans[spanToken].AddEvent(message)
 }
 
-func AddError(errorName string, err error, vars ...interface{}) {
+func AddError(spanToken SpanToken, errorName string, err error, vars ...interface{}) {
 
 	if err == nil {
 		err = errors.New("NIL ERROR")
 	}
 	messageError := fmt.Errorf("APP ERROR: %s - %v", fmt.Sprintf(errorName, vars...), err)
-	currentSpan.RecordError(errors.New(messageError.Error()))
+	currentSpans[spanToken].RecordError(errors.New(messageError.Error()))
 }
 
 func InjectNatsHeaders(ctx context.Context, msg *nats.Msg) {
