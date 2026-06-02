@@ -9,13 +9,13 @@ import (
 
 func Encode(ctx context.Context, data interface{}) []byte {
 
-	ctx = otel.StartSpan(ctx, "bus.Encode")
-	defer otel.EndSpan(ctx)
+	ctx, st := otel.StartSpan(ctx, "bus.Encode")
+	defer otel.EndSpan(ctx, st)
 
-	otel.AddEvent("Marshalling Data")
+	otel.AddEvent(st, "Marshalling Data")
 	bytes, err := json.Marshal(data)
 	if err != nil {
-		otel.AddError("Error marshalling data", err)
+		otel.AddError(st, "Error marshalling data", err)
 		return nil
 	}
 
@@ -25,10 +25,10 @@ func Encode(ctx context.Context, data interface{}) []byte {
 
 func Decode(ctx context.Context, data []byte, target interface{}) error {
 
-	ctx = otel.StartSpan(ctx, "bus.Decode")
-	defer otel.EndSpan(ctx)
+	ctx, st := otel.StartSpan(ctx, "bus.Decode")
+	defer otel.EndSpan(ctx, st)
 
-	otel.AddEvent("Unmarshalling Data")
+	otel.AddEvent(st, "Unmarshalling Data")
 	err := json.Unmarshal(data, target)
 	if err != nil {
 		return err

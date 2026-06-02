@@ -261,10 +261,15 @@ func (cls CoreLedgerService) GetLedgerAccountBalance(ctx context.Context, reques
 
 func (cls CoreLedgerService) CreateLedgerAccount(ctx context.Context, request *model.CreateLedgerAccountRequest) (*model.CreateLedgerAccountResponse, error) {
 
+	ctx, st := otel.StartSpan(ctx, "CoreLedgerService.CreateLedgerAccount")
+	defer otel.EndSpan(ctx, st)
+
 	var response model.CreateLedgerAccountResponse
 
+	otel.AddEvent(st, "Creating Ledger Account: %s", request.Name)
 	acct, err := CreateAccount(ctx, cls.DB, request.LedgerId, request.Name, request.Code, request.Class, request.Metadata, request.ParentAccountId, request.Currency)
 	if err != nil {
+		otel.AddError(st, "Error creating ledger account", err)
 		response.Status = &model.Status{Code: http.StatusBadRequest, StatusMessage: err.Error()}
 		return &response, nil
 	}
@@ -274,6 +279,8 @@ func (cls CoreLedgerService) CreateLedgerAccount(ctx context.Context, request *m
 	response.Code = acct.Code
 	response.LedgerId = acct.LedgerID
 	response.Status = &model.Status{Code: http.StatusOK}
+
+	otel.AddEvent(st, "Ledger Account Created: %s", acct.ID)
 
 	return &response, nil
 }

@@ -9,11 +9,13 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/nats.go/micro"
 	"go.opentelemetry.io/contrib/exporters/autoexport"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	ot "go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.41.0"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/grpc"
 )
 
 const (
@@ -71,6 +73,14 @@ func ExtractNatsContext(request micro.Request) context.Context {
 	ctx := prop.Extract(context.Background(), natsHeaderCarrier(request.Headers()))
 	return ctx
 
+}
+
+func InjectClientGRPCHeaders() grpc.DialOption {
+	return grpc.WithStatsHandler(otelgrpc.NewClientHandler())
+}
+
+func InjectServerGRPCHeaders() grpc.ServerOption {
+	return grpc.StatsHandler(otelgrpc.NewServerHandler())
 }
 
 func NewExporter(ctx context.Context, exporterType string) sdktrace.SpanExporter {

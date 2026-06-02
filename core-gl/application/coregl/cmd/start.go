@@ -7,6 +7,7 @@ import (
 
 	"github.com/openreserveio/core/core-gl/generated/glmodel"
 	"github.com/openreserveio/core/core-gl/service"
+	"github.com/openreserveio/core/core-util/otel"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
@@ -58,6 +59,7 @@ Start the Core Ledger Service
 		}
 
 		var grpcOpts []grpc.ServerOption
+		grpcOpts = append(grpcOpts, otel.InjectServerGRPCHeaders())
 		grpcServer := grpc.NewServer(grpcOpts...)
 		glmodel.RegisterGeneralLedgerServiceServer(grpcServer, coreGlService)
 

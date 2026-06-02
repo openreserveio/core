@@ -59,7 +59,7 @@ func NewCoreGLService(entityDbUrl string, busconnurl string, coreLedgerUrl strin
 
 	// Setup Core Ledger Service
 	otel.AddEvent(st, "Setting up Core Ledger Service")
-	conn, err := grpc.NewClient(coreLedgerUrl, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(coreLedgerUrl, grpc.WithTransportCredentials(insecure.NewCredentials()), otel.InjectClientGRPCHeaders())
 	if err != nil {
 		otel.AddError(st, "Error creating Core Ledger Client", err)
 		log.Fatalf("Unable to connect to Core Ledger: %v", err)

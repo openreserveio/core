@@ -18,8 +18,8 @@ services:
   #
   # PORTS:
   #   - 4222 NATS
-  #   - 6222 NATS
-  #   - 8222 NATS
+  #   - 4322 NATS
+  #   - 4422 NATS
   #############################################
   otelcollector:
     container_name: otel-collector
