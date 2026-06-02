@@ -15,7 +15,7 @@ type BusConnection struct {
 
 func NewBusConnection(ctx context.Context, connUrl string) (*BusConnection, error) {
 
-	otel.StartSpan(ctx, "bus.NewBusConnection")
+	ctx = otel.StartSpan(ctx, "bus.NewBusConnection")
 	defer otel.EndSpan(ctx)
 
 	nc, err := nats.Connect(connUrl)
