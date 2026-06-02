@@ -99,6 +99,9 @@ func (cgls *CoreGLService) GetChartOfAccounts(ctx context.Context, request *glmo
 
 func (cgls *CoreGLService) CreateChartOfAccounts(ctx context.Context, request *glmodel.CreateChartOfAccountsRequest) (*glmodel.CreateChartOfAccountsResponse, error) {
 
+	ctx, st := otel.StartSpan(ctx, "CoreGLService.CreateChartOfAccounts")
+	defer otel.EndSpan(ctx, st)
+
 	response := glmodel.CreateChartOfAccountsResponse{}
 
 	// Creating a new ledger to hold the CoA
@@ -107,22 +110,28 @@ func (cgls *CoreGLService) CreateChartOfAccounts(ctx context.Context, request *g
 		IsSubledger:    false,
 		ParentLedgerId: nil,
 	}
+
+	otel.AddEvent(st, "Creating Ledger from Title: %s", request.Title)
 	createLedgerResponse, err := cgls.CoreLedgerClient.CreateLedger(ctx, &ledgerRequest)
 	if err != nil {
+		otel.AddError(st, "Error creating ledger", err)
 		response.Status = &glmodel.CreateChartOfAccountsResponse_Status{Code: http.StatusInternalServerError, StatusMessage: err.Error()}
 		return &response, nil
 	}
 
 	// Create CoA in new ledger
+	otel.AddEvent(st, "Parsing given COA JSON")
 	var coa glmodelint.ChartOfAccounts
 	ledgerId := createLedgerResponse.LedgerId
 	err = json.Unmarshal(request.ProposedChartJSON, &coa)
 	if err != nil {
+		otel.AddError(st, "Error parsing COA JSON", err)
 		response.Status = &glmodel.CreateChartOfAccountsResponse_Status{Code: http.StatusBadRequest, StatusMessage: err.Error()}
 		return &response, nil
 	}
 	coa.LedgerID = ledgerId
 
+	otel.AddEvent(st, "Creating CoA in Ledger: %s", ledgerId)
 	updatedCoa, err := CreateChartOfAccounts(ctx, cgls.CoreLedgerClient, &coa)
 	if err != nil {
 		response.Status = &glmodel.CreateChartOfAccountsResponse_Status{Code: http.StatusInternalServerError, StatusMessage: err.Error()}

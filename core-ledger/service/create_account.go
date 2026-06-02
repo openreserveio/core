@@ -31,8 +31,10 @@ func CreateAccount(ctx context.Context, db *bun.DB, ledgerId string, name string
 		Currency:        currency,
 	}
 
-	_, err := db.NewInsert().Model(&acct).Exec(ctx)
+	tx, _ := db.BeginTx(ctx, nil)
+	_, err := tx.NewInsert().Model(&acct).Exec(ctx)
 	if err != nil {
+		tx.Rollback()
 		log.Errorf("Unable to insert new account:  %v", err)
 		return nil, err
 	}
@@ -44,9 +46,17 @@ func CreateAccount(ctx context.Context, db *bun.DB, ledgerId string, name string
 		Balance:                  0,
 		BalanceDate:              time.Now(),
 	}
-	_, err = db.NewInsert().Model(&acctBalance).Exec(ctx)
+	_, err = tx.NewInsert().Model(&acctBalance).Exec(ctx)
 	if err != nil {
+		tx.Rollback()
 		log.Errorf("Unable to insert new account:  %v", err)
+		return nil, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		log.Errorf("Error committing transaction: %v", err)
 		return nil, err
 	}
 

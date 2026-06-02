@@ -16,4 +16,5 @@ type FinancialAccount struct {
 	Code      string             `json:"code"`
 	Currency  string             `json:"currency"`
 	Children  []FinancialAccount `json:"children"`
+	Metadata  map[string]string  `json:"metadata"`
 }

@@ -7,15 +7,21 @@ import (
 
 	"github.com/openreserveio/core/core-gl/generated/model"
 	glmodelint "github.com/openreserveio/core/core-gl/glmodel"
+	"github.com/openreserveio/core/core-util/otel"
 	log "github.com/sirupsen/logrus"
 )
 
 func CreateChartOfAccounts(ctx context.Context, coreLedgerClient model.CoreLedgerServiceClient, coa *glmodelint.ChartOfAccounts) (*glmodelint.ChartOfAccounts, error) {
 
+	ctx, st := otel.StartSpan(ctx, "service.CreateChartOfAccounts")
+	defer otel.EndSpan(ctx, st)
+
+	otel.AddEvent(st, "Creating Chart of Accounts:  ASSETS")
 	for i, acctDef := range coa.Assets {
 
 		err := createAccountTree(ctx, coreLedgerClient, coa.LedgerID, &acctDef, "")
 		if err != nil {
+			otel.AddError(st, "CreateChartOfAccounts Asset error", err)
 			log.Errorf("CreateChartOfAccounts Asset error : %v", err)
 			return nil, err
 		}
@@ -73,7 +79,11 @@ func CreateChartOfAccounts(ctx context.Context, coreLedgerClient model.CoreLedge
 
 func createAccountTree(ctx context.Context, coreLedgerClient model.CoreLedgerServiceClient, ledgerId string, account *glmodelint.FinancialAccount, parentAccountId string) error {
 
+	ctx, st := otel.StartSpan(ctx, "service.createAccountTree")
+	defer otel.EndSpan(ctx, st)
+
 	// Create this account
+	otel.AddEvent(st, "Creating Account in Tree: [%s] %s", account.Code, account.Name)
 	response, err := coreLedgerClient.CreateLedgerAccount(ctx, &model.CreateLedgerAccountRequest{
 		LedgerId:        ledgerId,
 		Name:            account.Name,
@@ -84,18 +94,22 @@ func createAccountTree(ctx context.Context, coreLedgerClient model.CoreLedgerSer
 		Currency:        account.Currency,
 	})
 	if err != nil {
+		otel.AddError(st, "CreateAccount error", err)
 		log.Printf("CreateAccount error: %s", err)
 		return err
 	}
 	if response.Status.Code != http.StatusOK {
+		otel.AddEvent(st, "CreateAccount came back with an error:  %s", response.Status.StatusMessage)
 		return errors.New(response.Status.StatusMessage)
 	}
 
 	account.AccountID = response.AccountId
 	log.Infof("Created Account %s", account.Name)
+	otel.AddEvent(st, "Created Account: %s", account.Name)
 
 	// Process children, if any
 	for i, child := range account.Children {
+		otel.AddEvent(st, "Creating Child Account in Tree: [%s] %s", child.Code, child.Name)
 		err = createAccountTree(ctx, coreLedgerClient, ledgerId, &child, account.AccountID)
 		if err != nil {
 			return err

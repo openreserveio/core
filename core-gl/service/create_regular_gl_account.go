@@ -44,7 +44,7 @@ func CreateRegularGLAccount(ctx context.Context, coreLedgerClient model.CoreLedg
 	}
 
 	// If there is a parent account code, lookup the parent account ID
-	var parentAccountCode string
+	var parentAccountId string
 	if glAccountConfig.ParentAccountCode != "" {
 		otel.AddEvent(st, "Looking up parent account ID for code: %s", glAccountConfig.ParentAccountCode)
 		parentResponse, err := coreLedgerClient.GetLedgerAccount(ctx, &model.GetLedgerAccountRequest{Code: glAccountConfig.ParentAccountCode, LedgerId: ledgerId})
@@ -52,7 +52,7 @@ func CreateRegularGLAccount(ctx context.Context, coreLedgerClient model.CoreLedg
 			otel.AddError(st, "Error looking up parent account ID", err)
 			return err
 		}
-		parentAccountCode = parentResponse.AccountId
+		parentAccountId = parentResponse.AccountId
 	}
 
 	// Create account
@@ -66,7 +66,7 @@ func CreateRegularGLAccount(ctx context.Context, coreLedgerClient model.CoreLedg
 			glmodel.MD_KEY_TAGS:         strings.Join(glAccountConfig.Tags, ","),
 			glmodel.MD_KEY_ACCOUNT_TYPE: glmodel.MD_ACCOUNT_TYPE_REGULAR_GL,
 		},
-		ParentAccountId: parentAccountCode,
+		ParentAccountId: parentAccountId,
 		Currency:        glAccountConfig.Currency,
 	}
 	createLedgerAccountResp, err := coreLedgerClient.CreateLedgerAccount(ctx, &createLedgerAccountReq)
