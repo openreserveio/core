@@ -28,12 +28,15 @@ func GetAccount(ctx context.Context, coreLedgerClient model.CoreLedgerServiceCli
 	log.Infof("Getting Account Info for %s", accountCode)
 	getLedgerAccountResponse, err := coreLedgerClient.GetLedgerAccount(ctx, &model.GetLedgerAccountRequest{Code: accountCode, LedgerId: ledgerId})
 	if err != nil {
+		log.Errorf("Error getting account info: %v", err)
 		return nil, err
 	}
 	if getLedgerAccountResponse.Status.Code == http.StatusNotFound {
+		log.Infof("Account %s not found", accountCode)
 		return nil, nil
 	}
 	if getLedgerAccountResponse.Status.Code != 200 {
+		log.Errorf("Error getting account info: %v", getLedgerAccountResponse.Status.StatusMessage)
 		return nil, fmt.Errorf("Error getting account info: %v", getLedgerAccountResponse.Status.StatusMessage)
 	}
 

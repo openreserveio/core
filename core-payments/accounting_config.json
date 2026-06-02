@@ -1,0 +1,7 @@
+{
+  "ledger-id": "2ca03943-e815-43cf-9c9c-3d2230fcd5d5",
+  "us-fednow-settlement-account-code": "1100",
+  "us-fednow-settlement-in-progress-account-code": "2100",
+  "us-fednow-clearing-account-code": "2101",
+  "us-fednow-suspense-account-code": "2102"
+}

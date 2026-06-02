@@ -60,7 +60,7 @@ func NewFednowInboundPaymentWorkflow(listenHost string, listenPort string, redis
 		WorkerConcurrency: 2,
 		EnableMonitoring:  false,
 	}
-	flowService.Register("fednow-inbound-payment-workflow", wf.DefineWorkflow)
+	flowService.Register("fednow-inbound-payment-workflows", wf.DefineWorkflow)
 
 	wf.FlowService = &flowService
 

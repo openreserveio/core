@@ -159,7 +159,7 @@ func (fc *FedNowConnector) Start() error {
 			log.Infof("Kicking off Fednow Inbound Payment Workflow")
 			pmtJson, _ := json.Marshal(paymentMessage)
 			fs := &goflow.FlowService{RedisURL: fc.Config.RedisUrl}
-			fs.Execute("fednow-inbound-payment-workflow", &goflow.Request{
+			fs.Execute("fednow-inbound-payment-workflows", &goflow.Request{
 				Body: pmtJson,
 				Header: map[string][]string{
 					"header-key":  []string{"header-value"},
