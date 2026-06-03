@@ -3,6 +3,7 @@ package workflows
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"os"
 	"time"
 
@@ -129,5 +130,18 @@ func (wf *FednowInboundPaymentWorkflow) ProcessFednowInboundPayment(ctx workflow
 		return "", err
 	}
 
-	return "", nil
+	// Kick off sanctions screening child workflow and wait for results
+	var sanctionsScreen SanctionScreen
+	childWorkflowOptions := workflow.ChildWorkflowOptions{
+		TaskQueue: "sanction-screen-queue",
+	}
+	ctx = workflow.WithChildOptions(ctx, childWorkflowOptions)
+
+	// ultimate originator
+	workflow.ExecuteChildWorkflow(ctx, (&EntitySanctionsScreenWorkflow{}).SanctionScreenEntity, payment.UltimateOriginatorEntityID).Get(ctx, &sanctionsScreen)
+
+	// ultimate beneficiary
+	workflow.ExecuteChildWorkflow(ctx, (&EntitySanctionsScreenWorkflow{}).SanctionScreenEntity, payment.UltimateBeneficiaryEntityID).Get(ctx, &sanctionsScreen)
+
+	return fmt.Sprintf("%v", sanctionsScreen), nil
 }

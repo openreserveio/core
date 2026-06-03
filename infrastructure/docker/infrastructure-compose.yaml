@@ -143,3 +143,11 @@ services:
     restart: always
     ports:
       - 18084:8084
+
+  # Address Parser
+  postalparse:
+    image: openreserveio/postal:latest
+    container_name: postal-parse
+    restart: always
+    ports:
+      - 18080:8080

@@ -27,6 +27,7 @@ const (
 	GeneralLedgerService_PostTransaction_FullMethodName       = "/GeneralLedgerService/PostTransaction"
 	GeneralLedgerService_CreateEntity_FullMethodName          = "/GeneralLedgerService/CreateEntity"
 	GeneralLedgerService_GetEntity_FullMethodName             = "/GeneralLedgerService/GetEntity"
+	GeneralLedgerService_UpdateEntity_FullMethodName          = "/GeneralLedgerService/UpdateEntity"
 	GeneralLedgerService_GenerateReport_FullMethodName        = "/GeneralLedgerService/GenerateReport"
 )
 
@@ -42,6 +43,7 @@ type GeneralLedgerServiceClient interface {
 	PostTransaction(ctx context.Context, in *PostTransactionRequest, opts ...grpc.CallOption) (*PostTransactionResponse, error)
 	CreateEntity(ctx context.Context, in *CreateEntityRequest, opts ...grpc.CallOption) (*CreateEntityResponse, error)
 	GetEntity(ctx context.Context, in *GetEntityRequest, opts ...grpc.CallOption) (*GetEntityResponse, error)
+	UpdateEntity(ctx context.Context, in *UpdateEntityRequest, opts ...grpc.CallOption) (*UpdateEntityResponse, error)
 	GenerateReport(ctx context.Context, in *GenerateReportRequest, opts ...grpc.CallOption) (*GenerateReportResponse, error)
 }
 
@@ -133,6 +135,16 @@ func (c *generalLedgerServiceClient) GetEntity(ctx context.Context, in *GetEntit
 	return out, nil
 }
 
+func (c *generalLedgerServiceClient) UpdateEntity(ctx context.Context, in *UpdateEntityRequest, opts ...grpc.CallOption) (*UpdateEntityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateEntityResponse)
+	err := c.cc.Invoke(ctx, GeneralLedgerService_UpdateEntity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *generalLedgerServiceClient) GenerateReport(ctx context.Context, in *GenerateReportRequest, opts ...grpc.CallOption) (*GenerateReportResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GenerateReportResponse)
@@ -155,6 +167,7 @@ type GeneralLedgerServiceServer interface {
 	PostTransaction(context.Context, *PostTransactionRequest) (*PostTransactionResponse, error)
 	CreateEntity(context.Context, *CreateEntityRequest) (*CreateEntityResponse, error)
 	GetEntity(context.Context, *GetEntityRequest) (*GetEntityResponse, error)
+	UpdateEntity(context.Context, *UpdateEntityRequest) (*UpdateEntityResponse, error)
 	GenerateReport(context.Context, *GenerateReportRequest) (*GenerateReportResponse, error)
 	mustEmbedUnimplementedGeneralLedgerServiceServer()
 }
@@ -189,6 +202,9 @@ func (UnimplementedGeneralLedgerServiceServer) CreateEntity(context.Context, *Cr
 }
 func (UnimplementedGeneralLedgerServiceServer) GetEntity(context.Context, *GetEntityRequest) (*GetEntityResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetEntity not implemented")
+}
+func (UnimplementedGeneralLedgerServiceServer) UpdateEntity(context.Context, *UpdateEntityRequest) (*UpdateEntityResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateEntity not implemented")
 }
 func (UnimplementedGeneralLedgerServiceServer) GenerateReport(context.Context, *GenerateReportRequest) (*GenerateReportResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GenerateReport not implemented")
@@ -358,6 +374,24 @@ func _GeneralLedgerService_GetEntity_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GeneralLedgerService_UpdateEntity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateEntityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GeneralLedgerServiceServer).UpdateEntity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GeneralLedgerService_UpdateEntity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GeneralLedgerServiceServer).UpdateEntity(ctx, req.(*UpdateEntityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _GeneralLedgerService_GenerateReport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GenerateReportRequest)
 	if err := dec(in); err != nil {
@@ -414,6 +448,10 @@ var GeneralLedgerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetEntity",
 			Handler:    _GeneralLedgerService_GetEntity_Handler,
+		},
+		{
+			MethodName: "UpdateEntity",
+			Handler:    _GeneralLedgerService_UpdateEntity_Handler,
 		},
 		{
 			MethodName: "GenerateReport",

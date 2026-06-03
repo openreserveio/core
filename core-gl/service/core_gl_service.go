@@ -210,8 +210,51 @@ func (cgls *CoreGLService) CreateEntity(ctx context.Context, request *glmodel.Cr
 }
 
 func (cgls *CoreGLService) GetEntity(ctx context.Context, request *glmodel.GetEntityRequest) (*glmodel.GetEntityResponse, error) {
-	//TODO implement me
-	panic("implement me")
+
+	response := glmodel.GetEntityResponse{}
+
+	if request.EntityId == "" {
+		response.Status = &glmodel.GetEntityResponse_Status{Code: http.StatusBadRequest, StatusMessage: "EntityId is required"}
+		return &response, nil
+	}
+
+	ledgerEntity, err := GetEntity(ctx, cgls.EntityDB, request.EntityId)
+	if err != nil {
+		response.Status = &glmodel.GetEntityResponse_Status{Code: http.StatusInternalServerError, StatusMessage: err.Error()}
+		return &response, nil
+	}
+	if ledgerEntity == nil {
+		response.Status = &glmodel.GetEntityResponse_Status{Code: http.StatusNotFound, StatusMessage: fmt.Sprintf("Entity %s not found", request.EntityId)}
+		return &response, nil
+	}
+
+	response.Status = &glmodel.GetEntityResponse_Status{Code: http.StatusOK}
+	response.Entity = ledgerEntity
+	return &response, nil
+}
+
+func (cgls *CoreGLService) UpdateEntity(ctx context.Context, request *glmodel.UpdateEntityRequest) (*glmodel.UpdateEntityResponse, error) {
+
+	response := glmodel.UpdateEntityResponse{}
+
+	if request.Entity == nil || request.Entity.EntityId == "" {
+		response.Status = &glmodel.UpdateEntityResponse_Status{Code: http.StatusBadRequest, StatusMessage: "EntityId is required"}
+		return &response, nil
+	}
+
+	updated, err := UpdateEntity(ctx, cgls.EntityDB, request.Entity)
+	if err != nil {
+		response.Status = &glmodel.UpdateEntityResponse_Status{Code: http.StatusInternalServerError, StatusMessage: err.Error()}
+		return &response, nil
+	}
+	if updated == nil {
+		response.Status = &glmodel.UpdateEntityResponse_Status{Code: http.StatusNotFound, StatusMessage: fmt.Sprintf("Entity %s not found", request.Entity.EntityId)}
+		return &response, nil
+	}
+
+	response.Status = &glmodel.UpdateEntityResponse_Status{Code: http.StatusOK}
+	response.Entity = updated
+	return &response, nil
 }
 
 func (cgls *CoreGLService) GetAccount(ctx context.Context, request *glmodel.GetAccountRequest) (*glmodel.GetAccountResponse, error) {

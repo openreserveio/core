@@ -3,11 +3,13 @@ package workflows
 import (
 	"context"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
 	"github.com/moov-io/watchman/pkg/search"
 	"github.com/openreserveio/core/core-payments/generated/glmodel"
+	"github.com/openreserveio/core/core-payments/service/activities"
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 	"google.golang.org/grpc"
@@ -17,9 +19,19 @@ import (
 type EntitySanctionsScreenWorkflow struct {
 	GLServiceClient       glmodel.GeneralLedgerServiceClient
 	SanctionsSearchClient search.Client
+	PostalURL             *url.URL
 }
 
-func NewEntitySanctionsScreenWorkflow(ctx context.Context, coreGlUrl string, watchmanUrl string) *EntitySanctionsScreenWorkflow {
+type SanctionScreenResult struct {
+	Entity      glmodel.LedgerEntity
+	Score       float64
+	ScoreResult string
+}
+type SanctionScreen struct {
+	Results []SanctionScreenResult
+}
+
+func NewEntitySanctionsScreenWorkflow(ctx context.Context, coreGlUrl string, watchmanUrl string, postalUrl string) *EntitySanctionsScreenWorkflow {
 
 	sanctionsWF := EntitySanctionsScreenWorkflow{}
 
@@ -34,11 +46,18 @@ func NewEntitySanctionsScreenWorkflow(ctx context.Context, coreGlUrl string, wat
 	wc := search.NewClient(http.DefaultClient, watchmanUrl)
 	sanctionsWF.SanctionsSearchClient = wc
 
+	// Postal URL
+	postalUrlParsed, err := url.Parse(postalUrl)
+	if err != nil {
+		panic(err)
+	}
+	sanctionsWF.PostalURL = postalUrlParsed
+
 	return &sanctionsWF
 
 }
 
-func (wf *EntitySanctionsScreenWorkflow) SanctionScreenEntity(ctx workflow.Context, entityId string) error {
+func (wf *EntitySanctionsScreenWorkflow) SanctionScreenEntity(ctx workflow.Context, entityId string) (SanctionScreen, error) {
 
 	ao := workflow.ActivityOptions{
 		StartToCloseTimeout: 2 * time.Minute,
@@ -55,7 +74,26 @@ func (wf *EntitySanctionsScreenWorkflow) SanctionScreenEntity(ctx workflow.Conte
 	/** SANCTIONS SCREEN WORKFLOW
 	 *
 	 */
+	ss := SanctionScreen{}
 
-	return nil
+	var entity glmodel.LedgerEntity
+	err := workflow.ExecuteActivity(ctx, (&activities.SanctionsScreenActivity{}).RetrieveEntity, entityId).Get(ctx, &entity)
+	if err != nil {
+		return ss, err
+	}
+
+	ledgerEntryMailingAddress := glmodel.LedgerEntityAddress{}
+	err = workflow.ExecuteActivity(ctx, (&activities.SanctionsScreenActivity{}).AddressParse, *entity.MailingAddress).Get(ctx, &ledgerEntryMailingAddress)
+	if err != nil {
+		return ss, err
+	}
+	entity.MailingAddress = &ledgerEntryMailingAddress
+
+	err = workflow.ExecuteActivity(ctx, (&activities.SanctionsScreenActivity{}).UpdateEntity, entity).Get(ctx, &entity)
+	if err != nil {
+		return ss, err
+	}
+
+	return ss, nil
 
 }

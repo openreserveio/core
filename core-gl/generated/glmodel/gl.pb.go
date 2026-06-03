@@ -9,6 +9,7 @@ package glmodel
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	_ "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -296,7 +297,7 @@ func (x GenerateReportRequest_BaseReportType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use GenerateReportRequest_BaseReportType.Descriptor instead.
 func (GenerateReportRequest_BaseReportType) EnumDescriptor() ([]byte, []int) {
-	return file_glmodel_gl_proto_rawDescGZIP(), []int{26, 0}
+	return file_glmodel_gl_proto_rawDescGZIP(), []int{28, 0}
 }
 
 type CreateAccountRequest struct {
@@ -1219,6 +1220,28 @@ type LedgerEntityAddress struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	EntityAddressId string                 `protobuf:"bytes,1,opt,name=entityAddressId,proto3" json:"entityAddressId,omitempty"`
 	RawAddress      string                 `protobuf:"bytes,2,opt,name=rawAddress,proto3" json:"rawAddress,omitempty"`
+	House           string                 `protobuf:"bytes,3,opt,name=house,proto3" json:"house,omitempty"`
+	Category        string                 `protobuf:"bytes,4,opt,name=category,proto3" json:"category,omitempty"`
+	Near            string                 `protobuf:"bytes,5,opt,name=near,proto3" json:"near,omitempty"`
+	HouseNumber     string                 `protobuf:"bytes,6,opt,name=houseNumber,proto3" json:"houseNumber,omitempty"`
+	Road            string                 `protobuf:"bytes,7,opt,name=road,proto3" json:"road,omitempty"`
+	Unit            string                 `protobuf:"bytes,8,opt,name=unit,proto3" json:"unit,omitempty"`
+	Level           string                 `protobuf:"bytes,9,opt,name=level,proto3" json:"level,omitempty"`
+	Staircase       string                 `protobuf:"bytes,10,opt,name=staircase,proto3" json:"staircase,omitempty"`
+	Entrance        string                 `protobuf:"bytes,11,opt,name=entrance,proto3" json:"entrance,omitempty"`
+	PoBox           string                 `protobuf:"bytes,12,opt,name=poBox,proto3" json:"poBox,omitempty"`
+	Postcode        string                 `protobuf:"bytes,13,opt,name=postcode,proto3" json:"postcode,omitempty"`
+	Suburb          string                 `protobuf:"bytes,14,opt,name=suburb,proto3" json:"suburb,omitempty"`
+	CityDistrict    string                 `protobuf:"bytes,15,opt,name=cityDistrict,proto3" json:"cityDistrict,omitempty"`
+	City            string                 `protobuf:"bytes,16,opt,name=city,proto3" json:"city,omitempty"`
+	Island          string                 `protobuf:"bytes,17,opt,name=island,proto3" json:"island,omitempty"`
+	StateDistrict   string                 `protobuf:"bytes,18,opt,name=stateDistrict,proto3" json:"stateDistrict,omitempty"`
+	State           string                 `protobuf:"bytes,19,opt,name=state,proto3" json:"state,omitempty"`
+	CountryRegion   string                 `protobuf:"bytes,20,opt,name=countryRegion,proto3" json:"countryRegion,omitempty"`
+	Country         string                 `protobuf:"bytes,21,opt,name=country,proto3" json:"country,omitempty"`
+	WorldRegion     string                 `protobuf:"bytes,22,opt,name=worldRegion,proto3" json:"worldRegion,omitempty"`
+	CreateDate      string                 `protobuf:"bytes,23,opt,name=createDate,proto3" json:"createDate,omitempty"`
+	ParsedDate      string                 `protobuf:"bytes,24,opt,name=parsedDate,proto3" json:"parsedDate,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -1263,6 +1286,160 @@ func (x *LedgerEntityAddress) GetEntityAddressId() string {
 func (x *LedgerEntityAddress) GetRawAddress() string {
 	if x != nil {
 		return x.RawAddress
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetHouse() string {
+	if x != nil {
+		return x.House
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetNear() string {
+	if x != nil {
+		return x.Near
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetHouseNumber() string {
+	if x != nil {
+		return x.HouseNumber
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetRoad() string {
+	if x != nil {
+		return x.Road
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetUnit() string {
+	if x != nil {
+		return x.Unit
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetLevel() string {
+	if x != nil {
+		return x.Level
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetStaircase() string {
+	if x != nil {
+		return x.Staircase
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetEntrance() string {
+	if x != nil {
+		return x.Entrance
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetPoBox() string {
+	if x != nil {
+		return x.PoBox
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetPostcode() string {
+	if x != nil {
+		return x.Postcode
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetSuburb() string {
+	if x != nil {
+		return x.Suburb
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetCityDistrict() string {
+	if x != nil {
+		return x.CityDistrict
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetCity() string {
+	if x != nil {
+		return x.City
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetIsland() string {
+	if x != nil {
+		return x.Island
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetStateDistrict() string {
+	if x != nil {
+		return x.StateDistrict
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetCountryRegion() string {
+	if x != nil {
+		return x.CountryRegion
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetCountry() string {
+	if x != nil {
+		return x.Country
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetWorldRegion() string {
+	if x != nil {
+		return x.WorldRegion
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetCreateDate() string {
+	if x != nil {
+		return x.CreateDate
+	}
+	return ""
+}
+
+func (x *LedgerEntityAddress) GetParsedDate() string {
+	if x != nil {
+		return x.ParsedDate
 	}
 	return ""
 }
@@ -1763,6 +1940,102 @@ func (x *GetEntityResponse) GetEntity() *LedgerEntity {
 	return nil
 }
 
+type UpdateEntityRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Entity        *LedgerEntity          `protobuf:"bytes,1,opt,name=entity,proto3" json:"entity,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateEntityRequest) Reset() {
+	*x = UpdateEntityRequest{}
+	mi := &file_glmodel_gl_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateEntityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateEntityRequest) ProtoMessage() {}
+
+func (x *UpdateEntityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_glmodel_gl_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateEntityRequest.ProtoReflect.Descriptor instead.
+func (*UpdateEntityRequest) Descriptor() ([]byte, []int) {
+	return file_glmodel_gl_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *UpdateEntityRequest) GetEntity() *LedgerEntity {
+	if x != nil {
+		return x.Entity
+	}
+	return nil
+}
+
+type UpdateEntityResponse struct {
+	state         protoimpl.MessageState       `protogen:"open.v1"`
+	Status        *UpdateEntityResponse_Status `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
+	Entity        *LedgerEntity                `protobuf:"bytes,2,opt,name=entity,proto3" json:"entity,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateEntityResponse) Reset() {
+	*x = UpdateEntityResponse{}
+	mi := &file_glmodel_gl_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateEntityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateEntityResponse) ProtoMessage() {}
+
+func (x *UpdateEntityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_glmodel_gl_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateEntityResponse.ProtoReflect.Descriptor instead.
+func (*UpdateEntityResponse) Descriptor() ([]byte, []int) {
+	return file_glmodel_gl_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *UpdateEntityResponse) GetStatus() *UpdateEntityResponse_Status {
+	if x != nil {
+		return x.Status
+	}
+	return nil
+}
+
+func (x *UpdateEntityResponse) GetEntity() *LedgerEntity {
+	if x != nil {
+		return x.Entity
+	}
+	return nil
+}
+
 type CreateFBOAccountRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	LedgerId      string                 `protobuf:"bytes,1,opt,name=ledgerId,proto3" json:"ledgerId,omitempty"`
@@ -1772,7 +2045,7 @@ type CreateFBOAccountRequest struct {
 
 func (x *CreateFBOAccountRequest) Reset() {
 	*x = CreateFBOAccountRequest{}
-	mi := &file_glmodel_gl_proto_msgTypes[22]
+	mi := &file_glmodel_gl_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1784,7 +2057,7 @@ func (x *CreateFBOAccountRequest) String() string {
 func (*CreateFBOAccountRequest) ProtoMessage() {}
 
 func (x *CreateFBOAccountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[22]
+	mi := &file_glmodel_gl_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1797,7 +2070,7 @@ func (x *CreateFBOAccountRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateFBOAccountRequest.ProtoReflect.Descriptor instead.
 func (*CreateFBOAccountRequest) Descriptor() ([]byte, []int) {
-	return file_glmodel_gl_proto_rawDescGZIP(), []int{22}
+	return file_glmodel_gl_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *CreateFBOAccountRequest) GetLedgerId() string {
@@ -1816,7 +2089,7 @@ type CreateFBOAccountResponse struct {
 
 func (x *CreateFBOAccountResponse) Reset() {
 	*x = CreateFBOAccountResponse{}
-	mi := &file_glmodel_gl_proto_msgTypes[23]
+	mi := &file_glmodel_gl_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1828,7 +2101,7 @@ func (x *CreateFBOAccountResponse) String() string {
 func (*CreateFBOAccountResponse) ProtoMessage() {}
 
 func (x *CreateFBOAccountResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[23]
+	mi := &file_glmodel_gl_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1841,7 +2114,7 @@ func (x *CreateFBOAccountResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateFBOAccountResponse.ProtoReflect.Descriptor instead.
 func (*CreateFBOAccountResponse) Descriptor() ([]byte, []int) {
-	return file_glmodel_gl_proto_rawDescGZIP(), []int{23}
+	return file_glmodel_gl_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *CreateFBOAccountResponse) GetStatus() *CreateFBOAccountResponse_Status {
@@ -1862,7 +2135,7 @@ type CreateFBOCustomerAccountRequest struct {
 
 func (x *CreateFBOCustomerAccountRequest) Reset() {
 	*x = CreateFBOCustomerAccountRequest{}
-	mi := &file_glmodel_gl_proto_msgTypes[24]
+	mi := &file_glmodel_gl_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1874,7 +2147,7 @@ func (x *CreateFBOCustomerAccountRequest) String() string {
 func (*CreateFBOCustomerAccountRequest) ProtoMessage() {}
 
 func (x *CreateFBOCustomerAccountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[24]
+	mi := &file_glmodel_gl_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1887,7 +2160,7 @@ func (x *CreateFBOCustomerAccountRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateFBOCustomerAccountRequest.ProtoReflect.Descriptor instead.
 func (*CreateFBOCustomerAccountRequest) Descriptor() ([]byte, []int) {
-	return file_glmodel_gl_proto_rawDescGZIP(), []int{24}
+	return file_glmodel_gl_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *CreateFBOCustomerAccountRequest) GetLedgerId() string {
@@ -1922,7 +2195,7 @@ type CreateFBOCustomerAccountResponse struct {
 
 func (x *CreateFBOCustomerAccountResponse) Reset() {
 	*x = CreateFBOCustomerAccountResponse{}
-	mi := &file_glmodel_gl_proto_msgTypes[25]
+	mi := &file_glmodel_gl_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1934,7 +2207,7 @@ func (x *CreateFBOCustomerAccountResponse) String() string {
 func (*CreateFBOCustomerAccountResponse) ProtoMessage() {}
 
 func (x *CreateFBOCustomerAccountResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[25]
+	mi := &file_glmodel_gl_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1947,7 +2220,7 @@ func (x *CreateFBOCustomerAccountResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateFBOCustomerAccountResponse.ProtoReflect.Descriptor instead.
 func (*CreateFBOCustomerAccountResponse) Descriptor() ([]byte, []int) {
-	return file_glmodel_gl_proto_rawDescGZIP(), []int{25}
+	return file_glmodel_gl_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *CreateFBOCustomerAccountResponse) GetLedgerId() string {
@@ -1984,7 +2257,7 @@ type GenerateReportRequest struct {
 
 func (x *GenerateReportRequest) Reset() {
 	*x = GenerateReportRequest{}
-	mi := &file_glmodel_gl_proto_msgTypes[26]
+	mi := &file_glmodel_gl_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1996,7 +2269,7 @@ func (x *GenerateReportRequest) String() string {
 func (*GenerateReportRequest) ProtoMessage() {}
 
 func (x *GenerateReportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[26]
+	mi := &file_glmodel_gl_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2009,7 +2282,7 @@ func (x *GenerateReportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateReportRequest.ProtoReflect.Descriptor instead.
 func (*GenerateReportRequest) Descriptor() ([]byte, []int) {
-	return file_glmodel_gl_proto_rawDescGZIP(), []int{26}
+	return file_glmodel_gl_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *GenerateReportRequest) GetLedgerId() string {
@@ -2057,7 +2330,7 @@ type GenerateReportResponse struct {
 
 func (x *GenerateReportResponse) Reset() {
 	*x = GenerateReportResponse{}
-	mi := &file_glmodel_gl_proto_msgTypes[27]
+	mi := &file_glmodel_gl_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2069,7 +2342,7 @@ func (x *GenerateReportResponse) String() string {
 func (*GenerateReportResponse) ProtoMessage() {}
 
 func (x *GenerateReportResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[27]
+	mi := &file_glmodel_gl_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2082,7 +2355,7 @@ func (x *GenerateReportResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateReportResponse.ProtoReflect.Descriptor instead.
 func (*GenerateReportResponse) Descriptor() ([]byte, []int) {
-	return file_glmodel_gl_proto_rawDescGZIP(), []int{27}
+	return file_glmodel_gl_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *GenerateReportResponse) GetStatus() *GenerateReportResponse_Status {
@@ -2109,7 +2382,7 @@ type CreateAccountResponse_Status struct {
 
 func (x *CreateAccountResponse_Status) Reset() {
 	*x = CreateAccountResponse_Status{}
-	mi := &file_glmodel_gl_proto_msgTypes[28]
+	mi := &file_glmodel_gl_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2121,7 +2394,7 @@ func (x *CreateAccountResponse_Status) String() string {
 func (*CreateAccountResponse_Status) ProtoMessage() {}
 
 func (x *CreateAccountResponse_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[28]
+	mi := &file_glmodel_gl_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2161,7 +2434,7 @@ type GetAccountResponse_Status struct {
 
 func (x *GetAccountResponse_Status) Reset() {
 	*x = GetAccountResponse_Status{}
-	mi := &file_glmodel_gl_proto_msgTypes[29]
+	mi := &file_glmodel_gl_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2173,7 +2446,7 @@ func (x *GetAccountResponse_Status) String() string {
 func (*GetAccountResponse_Status) ProtoMessage() {}
 
 func (x *GetAccountResponse_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[29]
+	mi := &file_glmodel_gl_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2213,7 +2486,7 @@ type UpdateAccountMetadataResponse_Status struct {
 
 func (x *UpdateAccountMetadataResponse_Status) Reset() {
 	*x = UpdateAccountMetadataResponse_Status{}
-	mi := &file_glmodel_gl_proto_msgTypes[31]
+	mi := &file_glmodel_gl_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2225,7 +2498,7 @@ func (x *UpdateAccountMetadataResponse_Status) String() string {
 func (*UpdateAccountMetadataResponse_Status) ProtoMessage() {}
 
 func (x *UpdateAccountMetadataResponse_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[31]
+	mi := &file_glmodel_gl_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2265,7 +2538,7 @@ type GetChartOfAccountsResponse_Status struct {
 
 func (x *GetChartOfAccountsResponse_Status) Reset() {
 	*x = GetChartOfAccountsResponse_Status{}
-	mi := &file_glmodel_gl_proto_msgTypes[32]
+	mi := &file_glmodel_gl_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2277,7 +2550,7 @@ func (x *GetChartOfAccountsResponse_Status) String() string {
 func (*GetChartOfAccountsResponse_Status) ProtoMessage() {}
 
 func (x *GetChartOfAccountsResponse_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[32]
+	mi := &file_glmodel_gl_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2317,7 +2590,7 @@ type CreateChartOfAccountsResponse_Status struct {
 
 func (x *CreateChartOfAccountsResponse_Status) Reset() {
 	*x = CreateChartOfAccountsResponse_Status{}
-	mi := &file_glmodel_gl_proto_msgTypes[33]
+	mi := &file_glmodel_gl_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2329,7 +2602,7 @@ func (x *CreateChartOfAccountsResponse_Status) String() string {
 func (*CreateChartOfAccountsResponse_Status) ProtoMessage() {}
 
 func (x *CreateChartOfAccountsResponse_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[33]
+	mi := &file_glmodel_gl_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2369,7 +2642,7 @@ type PostTransactionResponse_Status struct {
 
 func (x *PostTransactionResponse_Status) Reset() {
 	*x = PostTransactionResponse_Status{}
-	mi := &file_glmodel_gl_proto_msgTypes[34]
+	mi := &file_glmodel_gl_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2381,7 +2654,7 @@ func (x *PostTransactionResponse_Status) String() string {
 func (*PostTransactionResponse_Status) ProtoMessage() {}
 
 func (x *PostTransactionResponse_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[34]
+	mi := &file_glmodel_gl_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2421,7 +2694,7 @@ type CreateEntityResponse_Status struct {
 
 func (x *CreateEntityResponse_Status) Reset() {
 	*x = CreateEntityResponse_Status{}
-	mi := &file_glmodel_gl_proto_msgTypes[35]
+	mi := &file_glmodel_gl_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2433,7 +2706,7 @@ func (x *CreateEntityResponse_Status) String() string {
 func (*CreateEntityResponse_Status) ProtoMessage() {}
 
 func (x *CreateEntityResponse_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[35]
+	mi := &file_glmodel_gl_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2473,7 +2746,7 @@ type GetEntityResponse_Status struct {
 
 func (x *GetEntityResponse_Status) Reset() {
 	*x = GetEntityResponse_Status{}
-	mi := &file_glmodel_gl_proto_msgTypes[36]
+	mi := &file_glmodel_gl_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2485,7 +2758,7 @@ func (x *GetEntityResponse_Status) String() string {
 func (*GetEntityResponse_Status) ProtoMessage() {}
 
 func (x *GetEntityResponse_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[36]
+	mi := &file_glmodel_gl_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2515,6 +2788,58 @@ func (x *GetEntityResponse_Status) GetStatusMessage() string {
 	return ""
 }
 
+type UpdateEntityResponse_Status struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          int64                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	StatusMessage string                 `protobuf:"bytes,2,opt,name=statusMessage,proto3" json:"statusMessage,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateEntityResponse_Status) Reset() {
+	*x = UpdateEntityResponse_Status{}
+	mi := &file_glmodel_gl_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateEntityResponse_Status) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateEntityResponse_Status) ProtoMessage() {}
+
+func (x *UpdateEntityResponse_Status) ProtoReflect() protoreflect.Message {
+	mi := &file_glmodel_gl_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateEntityResponse_Status.ProtoReflect.Descriptor instead.
+func (*UpdateEntityResponse_Status) Descriptor() ([]byte, []int) {
+	return file_glmodel_gl_proto_rawDescGZIP(), []int{23, 0}
+}
+
+func (x *UpdateEntityResponse_Status) GetCode() int64 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *UpdateEntityResponse_Status) GetStatusMessage() string {
+	if x != nil {
+		return x.StatusMessage
+	}
+	return ""
+}
+
 type CreateFBOAccountResponse_Status struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Code          int64                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
@@ -2525,7 +2850,7 @@ type CreateFBOAccountResponse_Status struct {
 
 func (x *CreateFBOAccountResponse_Status) Reset() {
 	*x = CreateFBOAccountResponse_Status{}
-	mi := &file_glmodel_gl_proto_msgTypes[37]
+	mi := &file_glmodel_gl_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2537,7 +2862,7 @@ func (x *CreateFBOAccountResponse_Status) String() string {
 func (*CreateFBOAccountResponse_Status) ProtoMessage() {}
 
 func (x *CreateFBOAccountResponse_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[37]
+	mi := &file_glmodel_gl_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2550,7 +2875,7 @@ func (x *CreateFBOAccountResponse_Status) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateFBOAccountResponse_Status.ProtoReflect.Descriptor instead.
 func (*CreateFBOAccountResponse_Status) Descriptor() ([]byte, []int) {
-	return file_glmodel_gl_proto_rawDescGZIP(), []int{23, 0}
+	return file_glmodel_gl_proto_rawDescGZIP(), []int{25, 0}
 }
 
 func (x *CreateFBOAccountResponse_Status) GetCode() int64 {
@@ -2577,7 +2902,7 @@ type GenerateReportResponse_Status struct {
 
 func (x *GenerateReportResponse_Status) Reset() {
 	*x = GenerateReportResponse_Status{}
-	mi := &file_glmodel_gl_proto_msgTypes[38]
+	mi := &file_glmodel_gl_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2589,7 +2914,7 @@ func (x *GenerateReportResponse_Status) String() string {
 func (*GenerateReportResponse_Status) ProtoMessage() {}
 
 func (x *GenerateReportResponse_Status) ProtoReflect() protoreflect.Message {
-	mi := &file_glmodel_gl_proto_msgTypes[38]
+	mi := &file_glmodel_gl_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2602,7 +2927,7 @@ func (x *GenerateReportResponse_Status) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateReportResponse_Status.ProtoReflect.Descriptor instead.
 func (*GenerateReportResponse_Status) Descriptor() ([]byte, []int) {
-	return file_glmodel_gl_proto_rawDescGZIP(), []int{27, 0}
+	return file_glmodel_gl_proto_rawDescGZIP(), []int{29, 0}
 }
 
 func (x *GenerateReportResponse_Status) GetCode() int64 {
@@ -2623,7 +2948,7 @@ var File_glmodel_gl_proto protoreflect.FileDescriptor
 
 const file_glmodel_gl_proto_rawDesc = "" +
 	"\n" +
-	"\x10glmodel/gl.proto\"\xfb\x03\n" +
+	"\x10glmodel/gl.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xfb\x03\n" +
 	"\x14CreateAccountRequest\x12C\n" +
 	"\vaccountType\x18\x01 \x01(\x0e2!.CreateAccountRequest.AccountTypeR\vaccountType\x12\x1a\n" +
 	"\bledgerId\x18\x02 \x01(\tR\bledgerId\x12 \n" +
@@ -2724,12 +3049,39 @@ const file_glmodel_gl_proto_rawDesc = "" +
 	"\n" +
 	"createDate\x18\n" +
 	" \x01(\tR\n" +
-	"createDate\"_\n" +
+	"createDate\"\xb7\x05\n" +
 	"\x13LedgerEntityAddress\x12(\n" +
 	"\x0fentityAddressId\x18\x01 \x01(\tR\x0fentityAddressId\x12\x1e\n" +
 	"\n" +
 	"rawAddress\x18\x02 \x01(\tR\n" +
-	"rawAddress\"\x97\x04\n" +
+	"rawAddress\x12\x14\n" +
+	"\x05house\x18\x03 \x01(\tR\x05house\x12\x1a\n" +
+	"\bcategory\x18\x04 \x01(\tR\bcategory\x12\x12\n" +
+	"\x04near\x18\x05 \x01(\tR\x04near\x12 \n" +
+	"\vhouseNumber\x18\x06 \x01(\tR\vhouseNumber\x12\x12\n" +
+	"\x04road\x18\a \x01(\tR\x04road\x12\x12\n" +
+	"\x04unit\x18\b \x01(\tR\x04unit\x12\x14\n" +
+	"\x05level\x18\t \x01(\tR\x05level\x12\x1c\n" +
+	"\tstaircase\x18\n" +
+	" \x01(\tR\tstaircase\x12\x1a\n" +
+	"\bentrance\x18\v \x01(\tR\bentrance\x12\x14\n" +
+	"\x05poBox\x18\f \x01(\tR\x05poBox\x12\x1a\n" +
+	"\bpostcode\x18\r \x01(\tR\bpostcode\x12\x16\n" +
+	"\x06suburb\x18\x0e \x01(\tR\x06suburb\x12\"\n" +
+	"\fcityDistrict\x18\x0f \x01(\tR\fcityDistrict\x12\x12\n" +
+	"\x04city\x18\x10 \x01(\tR\x04city\x12\x16\n" +
+	"\x06island\x18\x11 \x01(\tR\x06island\x12$\n" +
+	"\rstateDistrict\x18\x12 \x01(\tR\rstateDistrict\x12\x14\n" +
+	"\x05state\x18\x13 \x01(\tR\x05state\x12$\n" +
+	"\rcountryRegion\x18\x14 \x01(\tR\rcountryRegion\x12\x18\n" +
+	"\acountry\x18\x15 \x01(\tR\acountry\x12 \n" +
+	"\vworldRegion\x18\x16 \x01(\tR\vworldRegion\x12\x1e\n" +
+	"\n" +
+	"createDate\x18\x17 \x01(\tR\n" +
+	"createDate\x12\x1e\n" +
+	"\n" +
+	"parsedDate\x18\x18 \x01(\tR\n" +
+	"parsedDate\"\x97\x04\n" +
 	"\fLedgerEntity\x12\x1a\n" +
 	"\bentityId\x18\x01 \x01(\tR\bentityId\x128\n" +
 	"\n" +
@@ -2798,6 +3150,14 @@ const file_glmodel_gl_proto_rawDesc = "" +
 	"\x06entity\x18\x02 \x01(\v2\r.LedgerEntityR\x06entity\x1aB\n" +
 	"\x06Status\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x03R\x04code\x12$\n" +
+	"\rstatusMessage\x18\x02 \x01(\tR\rstatusMessage\"<\n" +
+	"\x13UpdateEntityRequest\x12%\n" +
+	"\x06entity\x18\x01 \x01(\v2\r.LedgerEntityR\x06entity\"\xb7\x01\n" +
+	"\x14UpdateEntityResponse\x124\n" +
+	"\x06status\x18\x01 \x01(\v2\x1c.UpdateEntityResponse.StatusR\x06status\x12%\n" +
+	"\x06entity\x18\x02 \x01(\v2\r.LedgerEntityR\x06entity\x1aB\n" +
+	"\x06Status\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x03R\x04code\x12$\n" +
 	"\rstatusMessage\x18\x02 \x01(\tR\rstatusMessage\"5\n" +
 	"\x17CreateFBOAccountRequest\x12\x1a\n" +
 	"\bledgerId\x18\x01 \x01(\tR\bledgerId\"\x98\x01\n" +
@@ -2833,7 +3193,7 @@ const file_glmodel_gl_proto_rawDesc = "" +
 	"\rencodedReport\x18\x02 \x01(\fR\rencodedReport\x1aB\n" +
 	"\x06Status\x12\x12\n" +
 	"\x04code\x18\x01 \x01(\x03R\x04code\x12$\n" +
-	"\rstatusMessage\x18\x02 \x01(\tR\rstatusMessage2\x86\x05\n" +
+	"\rstatusMessage\x18\x02 \x01(\tR\rstatusMessage2\xc3\x05\n" +
 	"\x14GeneralLedgerService\x12>\n" +
 	"\rCreateAccount\x12\x15.CreateAccountRequest\x1a\x16.CreateAccountResponse\x125\n" +
 	"\n" +
@@ -2843,7 +3203,8 @@ const file_glmodel_gl_proto_rawDesc = "" +
 	"\x15CreateChartOfAccounts\x12\x1d.CreateChartOfAccountsRequest\x1a\x1e.CreateChartOfAccountsResponse\x12D\n" +
 	"\x0fPostTransaction\x12\x17.PostTransactionRequest\x1a\x18.PostTransactionResponse\x12;\n" +
 	"\fCreateEntity\x12\x14.CreateEntityRequest\x1a\x15.CreateEntityResponse\x122\n" +
-	"\tGetEntity\x12\x11.GetEntityRequest\x1a\x12.GetEntityResponse\x12A\n" +
+	"\tGetEntity\x12\x11.GetEntityRequest\x1a\x12.GetEntityResponse\x12;\n" +
+	"\fUpdateEntity\x12\x14.UpdateEntityRequest\x1a\x15.UpdateEntityResponse\x12A\n" +
 	"\x0eGenerateReport\x12\x16.GenerateReportRequest\x1a\x17.GenerateReportResponseB\n" +
 	"Z\b/glmodelb\x06proto3"
 
@@ -2860,7 +3221,7 @@ func file_glmodel_gl_proto_rawDescGZIP() []byte {
 }
 
 var file_glmodel_gl_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_glmodel_gl_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
+var file_glmodel_gl_proto_msgTypes = make([]protoimpl.MessageInfo, 42)
 var file_glmodel_gl_proto_goTypes = []any{
 	(CreateAccountRequest_AccountType)(0),        // 0: CreateAccountRequest.AccountType
 	(LedgerEntity_EntityType)(0),                 // 1: LedgerEntity.EntityType
@@ -2889,32 +3250,35 @@ var file_glmodel_gl_proto_goTypes = []any{
 	(*CreateEntityResponse)(nil),                 // 24: CreateEntityResponse
 	(*GetEntityRequest)(nil),                     // 25: GetEntityRequest
 	(*GetEntityResponse)(nil),                    // 26: GetEntityResponse
-	(*CreateFBOAccountRequest)(nil),              // 27: CreateFBOAccountRequest
-	(*CreateFBOAccountResponse)(nil),             // 28: CreateFBOAccountResponse
-	(*CreateFBOCustomerAccountRequest)(nil),      // 29: CreateFBOCustomerAccountRequest
-	(*CreateFBOCustomerAccountResponse)(nil),     // 30: CreateFBOCustomerAccountResponse
-	(*GenerateReportRequest)(nil),                // 31: GenerateReportRequest
-	(*GenerateReportResponse)(nil),               // 32: GenerateReportResponse
-	(*CreateAccountResponse_Status)(nil),         // 33: CreateAccountResponse.Status
-	(*GetAccountResponse_Status)(nil),            // 34: GetAccountResponse.Status
-	nil,                                          // 35: UpdateAccountMetadataRequest.MetadataEntry
-	(*UpdateAccountMetadataResponse_Status)(nil), // 36: UpdateAccountMetadataResponse.Status
-	(*GetChartOfAccountsResponse_Status)(nil),    // 37: GetChartOfAccountsResponse.Status
-	(*CreateChartOfAccountsResponse_Status)(nil), // 38: CreateChartOfAccountsResponse.Status
-	(*PostTransactionResponse_Status)(nil),       // 39: PostTransactionResponse.Status
-	(*CreateEntityResponse_Status)(nil),          // 40: CreateEntityResponse.Status
-	(*GetEntityResponse_Status)(nil),             // 41: GetEntityResponse.Status
-	(*CreateFBOAccountResponse_Status)(nil),      // 42: CreateFBOAccountResponse.Status
-	(*GenerateReportResponse_Status)(nil),        // 43: GenerateReportResponse.Status
+	(*UpdateEntityRequest)(nil),                  // 27: UpdateEntityRequest
+	(*UpdateEntityResponse)(nil),                 // 28: UpdateEntityResponse
+	(*CreateFBOAccountRequest)(nil),              // 29: CreateFBOAccountRequest
+	(*CreateFBOAccountResponse)(nil),             // 30: CreateFBOAccountResponse
+	(*CreateFBOCustomerAccountRequest)(nil),      // 31: CreateFBOCustomerAccountRequest
+	(*CreateFBOCustomerAccountResponse)(nil),     // 32: CreateFBOCustomerAccountResponse
+	(*GenerateReportRequest)(nil),                // 33: GenerateReportRequest
+	(*GenerateReportResponse)(nil),               // 34: GenerateReportResponse
+	(*CreateAccountResponse_Status)(nil),         // 35: CreateAccountResponse.Status
+	(*GetAccountResponse_Status)(nil),            // 36: GetAccountResponse.Status
+	nil,                                          // 37: UpdateAccountMetadataRequest.MetadataEntry
+	(*UpdateAccountMetadataResponse_Status)(nil), // 38: UpdateAccountMetadataResponse.Status
+	(*GetChartOfAccountsResponse_Status)(nil),    // 39: GetChartOfAccountsResponse.Status
+	(*CreateChartOfAccountsResponse_Status)(nil), // 40: CreateChartOfAccountsResponse.Status
+	(*PostTransactionResponse_Status)(nil),       // 41: PostTransactionResponse.Status
+	(*CreateEntityResponse_Status)(nil),          // 42: CreateEntityResponse.Status
+	(*GetEntityResponse_Status)(nil),             // 43: GetEntityResponse.Status
+	(*UpdateEntityResponse_Status)(nil),          // 44: UpdateEntityResponse.Status
+	(*CreateFBOAccountResponse_Status)(nil),      // 45: CreateFBOAccountResponse.Status
+	(*GenerateReportResponse_Status)(nil),        // 46: GenerateReportResponse.Status
 }
 var file_glmodel_gl_proto_depIdxs = []int32{
 	0,  // 0: CreateAccountRequest.accountType:type_name -> CreateAccountRequest.AccountType
-	33, // 1: CreateAccountResponse.status:type_name -> CreateAccountResponse.Status
-	34, // 2: GetAccountResponse.status:type_name -> GetAccountResponse.Status
-	35, // 3: UpdateAccountMetadataRequest.metadata:type_name -> UpdateAccountMetadataRequest.MetadataEntry
-	36, // 4: UpdateAccountMetadataResponse.status:type_name -> UpdateAccountMetadataResponse.Status
-	37, // 5: GetChartOfAccountsResponse.status:type_name -> GetChartOfAccountsResponse.Status
-	38, // 6: CreateChartOfAccountsResponse.status:type_name -> CreateChartOfAccountsResponse.Status
+	35, // 1: CreateAccountResponse.status:type_name -> CreateAccountResponse.Status
+	36, // 2: GetAccountResponse.status:type_name -> GetAccountResponse.Status
+	37, // 3: UpdateAccountMetadataRequest.metadata:type_name -> UpdateAccountMetadataRequest.MetadataEntry
+	38, // 4: UpdateAccountMetadataResponse.status:type_name -> UpdateAccountMetadataResponse.Status
+	39, // 5: GetChartOfAccountsResponse.status:type_name -> GetChartOfAccountsResponse.Status
+	40, // 6: CreateChartOfAccountsResponse.status:type_name -> CreateChartOfAccountsResponse.Status
 	16, // 7: JournalEntry.debits:type_name -> JournalEntryItem
 	16, // 8: JournalEntry.credits:type_name -> JournalEntryItem
 	1,  // 9: LedgerEntity.entityType:type_name -> LedgerEntity.EntityType
@@ -2927,39 +3291,44 @@ var file_glmodel_gl_proto_depIdxs = []int32{
 	20, // 16: PostTransactionRequest.corePayment:type_name -> CorePayment
 	19, // 17: PostTransactionRequest.ultimateOriginator:type_name -> LedgerEntity
 	19, // 18: PostTransactionRequest.ultimateBeneficiary:type_name -> LedgerEntity
-	39, // 19: PostTransactionResponse.status:type_name -> PostTransactionResponse.Status
+	41, // 19: PostTransactionResponse.status:type_name -> PostTransactionResponse.Status
 	19, // 20: CreateEntityRequest.entity:type_name -> LedgerEntity
-	40, // 21: CreateEntityResponse.status:type_name -> CreateEntityResponse.Status
-	41, // 22: GetEntityResponse.status:type_name -> GetEntityResponse.Status
+	42, // 21: CreateEntityResponse.status:type_name -> CreateEntityResponse.Status
+	43, // 22: GetEntityResponse.status:type_name -> GetEntityResponse.Status
 	19, // 23: GetEntityResponse.entity:type_name -> LedgerEntity
-	42, // 24: CreateFBOAccountResponse.status:type_name -> CreateFBOAccountResponse.Status
-	19, // 25: CreateFBOCustomerAccountRequest.owningEntity:type_name -> LedgerEntity
-	19, // 26: CreateFBOCustomerAccountResponse.owningEntity:type_name -> LedgerEntity
-	4,  // 27: GenerateReportRequest.baseReportType:type_name -> GenerateReportRequest.BaseReportType
-	43, // 28: GenerateReportResponse.status:type_name -> GenerateReportResponse.Status
-	5,  // 29: GeneralLedgerService.CreateAccount:input_type -> CreateAccountRequest
-	7,  // 30: GeneralLedgerService.GetAccount:input_type -> GetAccountRequest
-	9,  // 31: GeneralLedgerService.UpdateAccountMetadata:input_type -> UpdateAccountMetadataRequest
-	11, // 32: GeneralLedgerService.GetChartOfAccounts:input_type -> GetChartOfAccountsRequest
-	13, // 33: GeneralLedgerService.CreateChartOfAccounts:input_type -> CreateChartOfAccountsRequest
-	21, // 34: GeneralLedgerService.PostTransaction:input_type -> PostTransactionRequest
-	23, // 35: GeneralLedgerService.CreateEntity:input_type -> CreateEntityRequest
-	25, // 36: GeneralLedgerService.GetEntity:input_type -> GetEntityRequest
-	31, // 37: GeneralLedgerService.GenerateReport:input_type -> GenerateReportRequest
-	6,  // 38: GeneralLedgerService.CreateAccount:output_type -> CreateAccountResponse
-	8,  // 39: GeneralLedgerService.GetAccount:output_type -> GetAccountResponse
-	10, // 40: GeneralLedgerService.UpdateAccountMetadata:output_type -> UpdateAccountMetadataResponse
-	12, // 41: GeneralLedgerService.GetChartOfAccounts:output_type -> GetChartOfAccountsResponse
-	14, // 42: GeneralLedgerService.CreateChartOfAccounts:output_type -> CreateChartOfAccountsResponse
-	22, // 43: GeneralLedgerService.PostTransaction:output_type -> PostTransactionResponse
-	24, // 44: GeneralLedgerService.CreateEntity:output_type -> CreateEntityResponse
-	26, // 45: GeneralLedgerService.GetEntity:output_type -> GetEntityResponse
-	32, // 46: GeneralLedgerService.GenerateReport:output_type -> GenerateReportResponse
-	38, // [38:47] is the sub-list for method output_type
-	29, // [29:38] is the sub-list for method input_type
-	29, // [29:29] is the sub-list for extension type_name
-	29, // [29:29] is the sub-list for extension extendee
-	0,  // [0:29] is the sub-list for field type_name
+	19, // 24: UpdateEntityRequest.entity:type_name -> LedgerEntity
+	44, // 25: UpdateEntityResponse.status:type_name -> UpdateEntityResponse.Status
+	19, // 26: UpdateEntityResponse.entity:type_name -> LedgerEntity
+	45, // 27: CreateFBOAccountResponse.status:type_name -> CreateFBOAccountResponse.Status
+	19, // 28: CreateFBOCustomerAccountRequest.owningEntity:type_name -> LedgerEntity
+	19, // 29: CreateFBOCustomerAccountResponse.owningEntity:type_name -> LedgerEntity
+	4,  // 30: GenerateReportRequest.baseReportType:type_name -> GenerateReportRequest.BaseReportType
+	46, // 31: GenerateReportResponse.status:type_name -> GenerateReportResponse.Status
+	5,  // 32: GeneralLedgerService.CreateAccount:input_type -> CreateAccountRequest
+	7,  // 33: GeneralLedgerService.GetAccount:input_type -> GetAccountRequest
+	9,  // 34: GeneralLedgerService.UpdateAccountMetadata:input_type -> UpdateAccountMetadataRequest
+	11, // 35: GeneralLedgerService.GetChartOfAccounts:input_type -> GetChartOfAccountsRequest
+	13, // 36: GeneralLedgerService.CreateChartOfAccounts:input_type -> CreateChartOfAccountsRequest
+	21, // 37: GeneralLedgerService.PostTransaction:input_type -> PostTransactionRequest
+	23, // 38: GeneralLedgerService.CreateEntity:input_type -> CreateEntityRequest
+	25, // 39: GeneralLedgerService.GetEntity:input_type -> GetEntityRequest
+	27, // 40: GeneralLedgerService.UpdateEntity:input_type -> UpdateEntityRequest
+	33, // 41: GeneralLedgerService.GenerateReport:input_type -> GenerateReportRequest
+	6,  // 42: GeneralLedgerService.CreateAccount:output_type -> CreateAccountResponse
+	8,  // 43: GeneralLedgerService.GetAccount:output_type -> GetAccountResponse
+	10, // 44: GeneralLedgerService.UpdateAccountMetadata:output_type -> UpdateAccountMetadataResponse
+	12, // 45: GeneralLedgerService.GetChartOfAccounts:output_type -> GetChartOfAccountsResponse
+	14, // 46: GeneralLedgerService.CreateChartOfAccounts:output_type -> CreateChartOfAccountsResponse
+	22, // 47: GeneralLedgerService.PostTransaction:output_type -> PostTransactionResponse
+	24, // 48: GeneralLedgerService.CreateEntity:output_type -> CreateEntityResponse
+	26, // 49: GeneralLedgerService.GetEntity:output_type -> GetEntityResponse
+	28, // 50: GeneralLedgerService.UpdateEntity:output_type -> UpdateEntityResponse
+	34, // 51: GeneralLedgerService.GenerateReport:output_type -> GenerateReportResponse
+	42, // [42:52] is the sub-list for method output_type
+	32, // [32:42] is the sub-list for method input_type
+	32, // [32:32] is the sub-list for extension type_name
+	32, // [32:32] is the sub-list for extension extendee
+	0,  // [0:32] is the sub-list for field type_name
 }
 
 func init() { file_glmodel_gl_proto_init() }
@@ -2973,7 +3342,7 @@ func file_glmodel_gl_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_glmodel_gl_proto_rawDesc), len(file_glmodel_gl_proto_rawDesc)),
 			NumEnums:      5,
-			NumMessages:   39,
+			NumMessages:   42,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

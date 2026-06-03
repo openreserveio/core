@@ -22,6 +22,7 @@ func (act *PaymentActivity) ProcessEntities(ctx context.Context, payment pmtmode
 		var udStreetName string
 		var udCity string
 		var udState string
+		var udPostCode string
 		var udCountryCode string
 
 		var ucName string
@@ -29,6 +30,7 @@ func (act *PaymentActivity) ProcessEntities(ctx context.Context, payment pmtmode
 		var ucStreetName string
 		var ucCity string
 		var ucState string
+		var ucPostCode string
 		var ucCountryCode string
 
 		// Ultimate Debtor (Originator)
@@ -37,14 +39,17 @@ func (act *PaymentActivity) ProcessEntities(ctx context.Context, payment pmtmode
 			udName = string(*txfr.UltmtDbtr.Nm)
 			if txfr.UltmtDbtr.PstlAdr != nil {
 
-				if txfr.UltmtDbtr.PstlAdr.BldgNm != nil {
-					udBuildingNumber = string(*txfr.UltmtDbtr.PstlAdr.BldgNm)
+				if txfr.UltmtDbtr.PstlAdr.BldgNb != nil {
+					udBuildingNumber = string(*txfr.UltmtDbtr.PstlAdr.BldgNb)
 				}
 				if txfr.UltmtDbtr.PstlAdr.StrtNm != nil {
 					udStreetName = string(*txfr.UltmtDbtr.PstlAdr.StrtNm)
 				}
 				if txfr.UltmtDbtr.PstlAdr.TwnNm != nil {
 					udCity = string(*txfr.UltmtDbtr.PstlAdr.TwnNm)
+				}
+				if txfr.UltmtDbtr.PstlAdr.PstCd != nil {
+					udPostCode = string(*txfr.UltmtDbtr.PstlAdr.PstCd)
 				}
 				if txfr.UltmtDbtr.PstlAdr.CtrySubDvsn != nil {
 					udState = string(*txfr.UltmtDbtr.PstlAdr.CtrySubDvsn)
@@ -63,14 +68,17 @@ func (act *PaymentActivity) ProcessEntities(ctx context.Context, payment pmtmode
 			ucName = string(*txfr.UltmtCdtr.Nm)
 			if txfr.UltmtCdtr.PstlAdr != nil {
 
-				if txfr.UltmtCdtr.PstlAdr.BldgNm != nil {
-					ucBuildingNumber = string(*txfr.UltmtCdtr.PstlAdr.BldgNm)
+				if txfr.UltmtCdtr.PstlAdr.BldgNb != nil {
+					ucBuildingNumber = string(*txfr.UltmtCdtr.PstlAdr.BldgNb)
 				}
 				if txfr.UltmtCdtr.PstlAdr.StrtNm != nil {
 					ucStreetName = string(*txfr.UltmtCdtr.PstlAdr.StrtNm)
 				}
 				if txfr.UltmtCdtr.PstlAdr.TwnNm != nil {
 					ucCity = string(*txfr.UltmtCdtr.PstlAdr.TwnNm)
+				}
+				if txfr.UltmtCdtr.PstlAdr.PstCd != nil {
+					ucPostCode = string(*txfr.UltmtCdtr.PstlAdr.PstCd)
 				}
 				if txfr.UltmtCdtr.PstlAdr.CtrySubDvsn != nil {
 					ucState = string(*txfr.UltmtCdtr.PstlAdr.CtrySubDvsn)
@@ -92,7 +100,7 @@ func (act *PaymentActivity) ProcessEntities(ctx context.Context, payment pmtmode
 			ucFirstName = ucNameParts[0]
 			ucLastName = ucNameParts[1]
 		}
-		ucAddrRaw := strings.Join([]string{ucBuildingNumber, ucStreetName, ucCity, ucState, ucCountryCode}, " ")
+		ucAddrRaw := strings.Join([]string{ucBuildingNumber, ucStreetName, ucCity, ucState, ucPostCode, ucCountryCode}, " ")
 
 		respUC, err := act.CoreGLClient.CreateEntity(ctx, &glmodel.CreateEntityRequest{
 			Entity: &glmodel.LedgerEntity{
@@ -128,7 +136,7 @@ func (act *PaymentActivity) ProcessEntities(ctx context.Context, payment pmtmode
 			udFirstName = udNameParts[0]
 			udLastName = udNameParts[1]
 		}
-		udAddrRaw := strings.Join([]string{udBuildingNumber, udStreetName, udCity, udState, udCountryCode}, " ")
+		udAddrRaw := strings.Join([]string{udBuildingNumber, udStreetName, udCity, udState, udPostCode, udCountryCode}, " ")
 
 		respUD, err := act.CoreGLClient.CreateEntity(ctx, &glmodel.CreateEntityRequest{
 			Entity: &glmodel.LedgerEntity{

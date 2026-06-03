@@ -41,17 +41,19 @@ var _ = Describe("FednowInbound", func() {
 			clearingSystem := pacs_008_001_08.ExternalCashClearingSystem1Code("FDW")
 
 			ultimateDebtorName := pacs_008_001_08.Max140Text("Ultimate Debtorperson")
-			ultimateDebtorStreetName := pacs_008_001_08.Max70Text("220th Street SE")
-			ultimateDebtorStreetNumber := pacs_008_001_08.Max16Text("246")
+			ultimateDebtorStreetName := pacs_008_001_08.Max70Text("230th Street SE")
+			ultimateDebtorStreetNumber := pacs_008_001_08.Max16Text("240")
 			ultimateDebtorTownName := pacs_008_001_08.Max35Text("Bothell")
 			ultimateDebtorState := pacs_008_001_08.Max35Text("WA")
+			ultimateDebtorPostCode := pacs_008_001_08.Max16Text("98021")
 			ultimateDebtorCountry := pacs_008_001_08.CountryCode("US")
 
 			ultimateCreditorName := pacs_008_001_08.Max140Text("Ultimate Creditorperson")
-			ultimateCreditorStreetName := pacs_008_001_08.Max70Text("Day Street")
-			ultimateCreditorStreetNumber := pacs_008_001_08.Max16Text("205")
+			ultimateCreditorStreetName := pacs_008_001_08.Max70Text("Dayz Street")
+			ultimateCreditorStreetNumber := pacs_008_001_08.Max16Text("207")
 			ultimateCreditorTownName := pacs_008_001_08.Max35Text("San Francisco")
 			ultimateCreditorState := pacs_008_001_08.Max35Text("CA")
+			ultimateCreditorPostCode := pacs_008_001_08.Max16Text("94122")
 			ultimateCreditorCountry := pacs_008_001_08.CountryCode("US")
 
 			addressCodeHome := pacs_008_001_08.AddressType2CodeHome
@@ -101,7 +103,7 @@ var _ = Describe("FednowInbound", func() {
 								Flr:         nil,
 								PstBx:       nil,
 								Room:        nil,
-								PstCd:       nil,
+								PstCd:       &ultimateDebtorPostCode,
 								TwnNm:       &ultimateDebtorTownName,
 								TwnLctnNm:   nil,
 								DstrctNm:    nil,
@@ -135,7 +137,7 @@ var _ = Describe("FednowInbound", func() {
 								Flr:         nil,
 								PstBx:       nil,
 								Room:        nil,
-								PstCd:       nil,
+								PstCd:       &ultimateCreditorPostCode,
 								TwnNm:       &ultimateCreditorTownName,
 								TwnLctnNm:   nil,
 								DstrctNm:    nil,

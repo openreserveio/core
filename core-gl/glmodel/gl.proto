@@ -16,6 +16,7 @@ service GeneralLedgerService {
 
   rpc CreateEntity(CreateEntityRequest) returns (CreateEntityResponse);
   rpc GetEntity(GetEntityRequest) returns (GetEntityResponse);
+  rpc UpdateEntity(UpdateEntityRequest) returns (UpdateEntityResponse);
 
   rpc GenerateReport(GenerateReportRequest) returns (GenerateReportResponse);
 
@@ -173,10 +174,36 @@ message LedgerEntityName {
 }
 
 
+import "google/protobuf/timestamp.proto";
+
 message LedgerEntityAddress {
 
   string entityAddressId = 1;
   string rawAddress = 2;
+
+  string house = 3;
+  string category = 4;
+  string near = 5;
+  string houseNumber = 6;
+  string road = 7;
+  string unit = 8;
+  string level = 9;
+  string staircase = 10;
+  string entrance = 11;
+  string poBox = 12;
+  string postcode = 13;
+  string suburb = 14;
+  string cityDistrict = 15;
+  string city = 16;
+  string island = 17;
+  string stateDistrict = 18;
+  string state = 19;
+  string countryRegion = 20;
+  string country = 21;
+  string worldRegion = 22;
+
+  string createDate = 23;
+  string parsedDate = 24;
 
 }
 
@@ -283,6 +310,24 @@ message GetEntityResponse {
   Status status = 1;
   LedgerEntity entity = 2;
 
+}
+
+message UpdateEntityRequest {
+
+  LedgerEntity entity = 1;
+
+}
+
+message UpdateEntityResponse {
+
+
+  message Status {
+    int64 code = 1;
+    string statusMessage = 2;
+  }
+
+  Status status = 1;
+  LedgerEntity entity = 2;
 }
 
 message CreateFBOAccountRequest {
