@@ -28,9 +28,10 @@ func CreateEntity(ctx context.Context, db *bun.DB, ledgerEntity *glmodel.LedgerE
 	}
 
 	entityName := glmodelint.EntityName{
-		ID:                uuid.NewString(),
-		IndividualSurName: ledgerEntity.EntityName.IndividualSurName,
-		CreateDate:        time.Now(),
+		ID:                  uuid.NewString(),
+		IndividualSurName:   ledgerEntity.EntityName.IndividualSurName,
+		IndividualGivenName: ledgerEntity.EntityName.IndividualGivenName,
+		CreateDate:          time.Now(),
 	}
 
 	entity := glmodelint.Entity{
@@ -60,6 +61,12 @@ func CreateEntity(ctx context.Context, db *bun.DB, ledgerEntity *glmodel.LedgerE
 		_, err = tx.NewInsert().Model(&businessAddress).Exec(ctx)
 		if err != nil {
 			log.Errorf("Error creating business address: %v", err)
+			return err
+		}
+
+		_, err = tx.NewInsert().Model(&entityName).Exec(ctx)
+		if err != nil {
+			log.Errorf("Error creating entity name: %v", err)
 			return err
 		}
 

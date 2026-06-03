@@ -134,3 +134,12 @@ services:
     volumes:
       - temporal-data:/home/temporal
     command: server start-dev --ip 0.0.0.0 --db-filename /home/temporal/temporal.db
+
+
+  # Compliance and Sanctions
+  watchman:
+    image: moov/watchman:latest
+    container_name: watchman
+    restart: always
+    ports:
+      - 18084:8084

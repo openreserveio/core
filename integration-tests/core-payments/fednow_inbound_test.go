@@ -41,7 +41,23 @@ var _ = Describe("FednowInbound", func() {
 			clearingSystem := pacs_008_001_08.ExternalCashClearingSystem1Code("FDW")
 
 			ultimateDebtorName := pacs_008_001_08.Max140Text("Ultimate Debtorperson")
+			ultimateDebtorStreetName := pacs_008_001_08.Max70Text("220th Street SE")
+			ultimateDebtorStreetNumber := pacs_008_001_08.Max16Text("246")
+			ultimateDebtorTownName := pacs_008_001_08.Max35Text("Bothell")
+			ultimateDebtorState := pacs_008_001_08.Max35Text("WA")
+			ultimateDebtorCountry := pacs_008_001_08.CountryCode("US")
+
 			ultimateCreditorName := pacs_008_001_08.Max140Text("Ultimate Creditorperson")
+			ultimateCreditorStreetName := pacs_008_001_08.Max70Text("Day Street")
+			ultimateCreditorStreetNumber := pacs_008_001_08.Max16Text("205")
+			ultimateCreditorTownName := pacs_008_001_08.Max35Text("San Francisco")
+			ultimateCreditorState := pacs_008_001_08.Max35Text("CA")
+			ultimateCreditorCountry := pacs_008_001_08.CountryCode("US")
+
+			addressCodeHome := pacs_008_001_08.AddressType2CodeHome
+			addressCodeBusiness := pacs_008_001_08.AddressType2CodeBizz
+
+			_ = addressCodeBusiness
 
 			message.FIToFICstmrCdtTrf = pacs_008_001_08.FIToFICustomerCreditTransferV08{
 				GrpHdr: pacs_008_001_08.GroupHeader93{
@@ -73,22 +89,24 @@ var _ = Describe("FednowInbound", func() {
 						UltmtDbtr: &pacs_008_001_08.PartyIdentification135{
 							Nm: &ultimateDebtorName,
 							PstlAdr: &pacs_008_001_08.PostalAddress24{
-								XMLName:     xml.Name{},
-								AdrTp:       nil,
+								XMLName: xml.Name{},
+								AdrTp: &pacs_008_001_08.AddressType3Choice{
+									Cd: &addressCodeHome,
+								},
 								Dept:        nil,
 								SubDept:     nil,
-								StrtNm:      nil,
-								BldgNb:      nil,
+								StrtNm:      &ultimateDebtorStreetName,
+								BldgNb:      &ultimateDebtorStreetNumber,
 								BldgNm:      nil,
 								Flr:         nil,
 								PstBx:       nil,
 								Room:        nil,
 								PstCd:       nil,
-								TwnNm:       nil,
+								TwnNm:       &ultimateDebtorTownName,
 								TwnLctnNm:   nil,
 								DstrctNm:    nil,
-								CtrySubDvsn: nil,
-								Ctry:        nil,
+								CtrySubDvsn: &ultimateDebtorState,
+								Ctry:        &ultimateDebtorCountry,
 								AdrLine:     nil,
 							},
 							Id:        nil,
@@ -105,8 +123,26 @@ var _ = Describe("FednowInbound", func() {
 						Cdtr:        pacs_008_001_08.PartyIdentification135{},
 						CdtrAcct:    nil,
 						UltmtCdtr: &pacs_008_001_08.PartyIdentification135{
-							Nm:        &ultimateCreditorName,
-							PstlAdr:   nil,
+							Nm: &ultimateCreditorName,
+							PstlAdr: &pacs_008_001_08.PostalAddress24{
+								XMLName:     xml.Name{},
+								AdrTp:       nil,
+								Dept:        nil,
+								SubDept:     nil,
+								StrtNm:      &ultimateCreditorStreetName,
+								BldgNb:      &ultimateCreditorStreetNumber,
+								BldgNm:      nil,
+								Flr:         nil,
+								PstBx:       nil,
+								Room:        nil,
+								PstCd:       nil,
+								TwnNm:       &ultimateCreditorTownName,
+								TwnLctnNm:   nil,
+								DstrctNm:    nil,
+								CtrySubDvsn: &ultimateCreditorState,
+								Ctry:        &ultimateCreditorCountry,
+								AdrLine:     nil,
+							},
 							Id:        nil,
 							CtryOfRes: nil,
 							CtctDtls:  nil,

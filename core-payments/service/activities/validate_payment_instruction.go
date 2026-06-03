@@ -15,7 +15,7 @@ import (
 
 func (act *PaymentActivity) ValidatePaymentInstruction(ctx context.Context, payment pmtmodel.Payment) (pmtmodel.Payment, error) {
 
-	convertedPayment, err := convertFednowMessageToPayment(&payment)
+	convertedPayment, err := ConvertFednowMessageToPayment(&payment)
 
 	if convertedPayment.ID != "" {
 		log.Infof("----> Payment is validated")
@@ -36,7 +36,7 @@ func (act *PaymentActivity) ValidatePaymentInstruction(ctx context.Context, paym
 
 }
 
-func convertFednowMessageToPayment(pmtMessage *pmtmodel.Payment) (*pmtmodel.Payment, error) {
+func ConvertFednowMessageToPayment(pmtMessage *pmtmodel.Payment) (*pmtmodel.Payment, error) {
 
 	var fedNowMessage pacs_008_001_08.Document
 	err := xml.Unmarshal(pmtMessage.PaymentMessage, &fedNowMessage)

@@ -124,5 +124,10 @@ func (wf *FednowInboundPaymentWorkflow) ProcessFednowInboundPayment(ctx workflow
 		return "", err
 	}
 
+	err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).ProcessEntities, payment).Get(ctx, &payment)
+	if err != nil {
+		return "", err
+	}
+
 	return "", nil
 }
