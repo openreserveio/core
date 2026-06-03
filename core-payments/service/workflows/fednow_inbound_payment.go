@@ -131,17 +131,29 @@ func (wf *FednowInboundPaymentWorkflow) ProcessFednowInboundPayment(ctx workflow
 	}
 
 	// Kick off sanctions screening child workflow and wait for results
-	var sanctionsScreen SanctionScreen
+	var sanctionsScreenOriginator SanctionScreen
+	var sanctionsScreenBeneficiary SanctionScreen
 	childWorkflowOptions := workflow.ChildWorkflowOptions{
 		TaskQueue: "sanction-screen-queue",
 	}
 	ctx = workflow.WithChildOptions(ctx, childWorkflowOptions)
 
 	// ultimate originator
-	workflow.ExecuteChildWorkflow(ctx, (&EntitySanctionsScreenWorkflow{}).SanctionScreenEntity, payment.UltimateOriginatorEntityID).Get(ctx, &sanctionsScreen)
+	err = workflow.ExecuteChildWorkflow(ctx, (&EntitySanctionsScreenWorkflow{}).SanctionScreenEntity, payment.UltimateOriginatorEntityID).Get(ctx, &sanctionsScreenOriginator)
+	if err != nil {
+		return "", err
+	}
 
 	// ultimate beneficiary
-	workflow.ExecuteChildWorkflow(ctx, (&EntitySanctionsScreenWorkflow{}).SanctionScreenEntity, payment.UltimateBeneficiaryEntityID).Get(ctx, &sanctionsScreen)
+	err = workflow.ExecuteChildWorkflow(ctx, (&EntitySanctionsScreenWorkflow{}).SanctionScreenEntity, payment.UltimateBeneficiaryEntityID).Get(ctx, &sanctionsScreenBeneficiary)
+	if err != nil {
+		return "", err
+	}
+
+	sanctionsScreen := SanctionScreen{
+		Results: append(sanctionsScreenOriginator.Results, sanctionsScreenBeneficiary.Results...),
+	}
+	sanctionsScreen.Results = append(sanctionsScreen.Results, sanctionsScreenBeneficiary.Results...)
 
 	return fmt.Sprintf("%v", sanctionsScreen), nil
 }

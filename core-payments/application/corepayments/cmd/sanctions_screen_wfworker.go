@@ -57,6 +57,7 @@ Workflow to manage the sanctions screen process
 		w.RegisterActivity(sanctionsActivity.RetrieveEntity)
 		w.RegisterActivity(sanctionsActivity.AddressParse)
 		w.RegisterActivity(sanctionsActivity.UpdateEntity)
+		w.RegisterActivity(sanctionsActivity.WatchmanScreen)
 
 		// Start the Worker
 		err = w.Run(worker.InterruptCh())

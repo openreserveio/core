@@ -22,13 +22,8 @@ type EntitySanctionsScreenWorkflow struct {
 	PostalURL             *url.URL
 }
 
-type SanctionScreenResult struct {
-	Entity      glmodel.LedgerEntity
-	Score       float64
-	ScoreResult string
-}
 type SanctionScreen struct {
-	Results []SanctionScreenResult
+	Results []activities.SanctionScreenResult
 }
 
 func NewEntitySanctionsScreenWorkflow(ctx context.Context, coreGlUrl string, watchmanUrl string, postalUrl string) *EntitySanctionsScreenWorkflow {
@@ -89,10 +84,26 @@ func (wf *EntitySanctionsScreenWorkflow) SanctionScreenEntity(ctx workflow.Conte
 	}
 	entity.MailingAddress = &ledgerEntryMailingAddress
 
-	err = workflow.ExecuteActivity(ctx, (&activities.SanctionsScreenActivity{}).UpdateEntity, entity).Get(ctx, &entity)
+	ledgerEntryBusinessAddress := glmodel.LedgerEntityAddress{}
+	err = workflow.ExecuteActivity(ctx, (&activities.SanctionsScreenActivity{}).AddressParse, *entity.BusinessAddress).Get(ctx, &ledgerEntryBusinessAddress)
 	if err != nil {
 		return ss, err
 	}
+	entity.BusinessAddress = &ledgerEntryBusinessAddress
+
+	var updatedEntity glmodel.LedgerEntity
+	err = workflow.ExecuteActivity(ctx, (&activities.SanctionsScreenActivity{}).UpdateEntity, entity).Get(ctx, &updatedEntity)
+	if err != nil {
+		return ss, err
+	}
+
+	var sanctionScreenResults []activities.SanctionScreenResult
+	err = workflow.ExecuteActivity(ctx, (&activities.SanctionsScreenActivity{}).WatchmanScreen, updatedEntity).Get(ctx, &sanctionScreenResults)
+	if err != nil {
+		return ss, err
+	}
+
+	ss.Results = sanctionScreenResults
 
 	return ss, nil
 

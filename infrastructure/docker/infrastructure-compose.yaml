@@ -138,11 +138,15 @@ services:
 
   # Compliance and Sanctions
   watchman:
-    image: moov/watchman:latest
+    image: moov/watchman:v0.63.1.arm64
     container_name: watchman
     restart: always
     ports:
       - 18084:8084
+    environment:
+      - "OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcollector:4318"
+      - "INCLUDED_LISTS=us_ofac,eu_csl,uk_csl,un_csl,us_csl,us_fincen_311,us_non_sdn"
+  
 
   # Address Parser
   postalparse:

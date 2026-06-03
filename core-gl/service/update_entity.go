@@ -14,7 +14,7 @@ import (
 func UpdateEntity(ctx context.Context, db *bun.DB, ledgerEntity *glmodel.LedgerEntity) (*glmodel.LedgerEntity, error) {
 
 	var existing glmodelint.Entity
-	err := db.NewSelect().Model(&existing).Where("id = ?", ledgerEntity.EntityId).Scan(ctx, &existing)
+	err := db.NewSelect().Model(&glmodelint.Entity{}).Where("id = ?", ledgerEntity.EntityId).Scan(ctx, &existing)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
