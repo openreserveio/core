@@ -250,6 +250,8 @@ message PostTransactionRequest {
     US_PAYMENT_FEDNOW = 2;
     US_PAYMENT_FEDWIRE = 3;
     DLT = 4;
+    PAYMENT_SUSPENSE = 5;
+    PAYMENT_CLEARED_SUSPENSE = 6;
   }
 
   string ledgerId = 1;

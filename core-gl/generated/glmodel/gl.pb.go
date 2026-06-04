@@ -199,11 +199,13 @@ func (CorePayment_PaymentLifecycle) EnumDescriptor() ([]byte, []int) {
 type PostTransactionRequest_TransactionType int32
 
 const (
-	PostTransactionRequest_JOURNAL_ENTRY      PostTransactionRequest_TransactionType = 0
-	PostTransactionRequest_US_PAYMENT_ACH     PostTransactionRequest_TransactionType = 1
-	PostTransactionRequest_US_PAYMENT_FEDNOW  PostTransactionRequest_TransactionType = 2
-	PostTransactionRequest_US_PAYMENT_FEDWIRE PostTransactionRequest_TransactionType = 3
-	PostTransactionRequest_DLT                PostTransactionRequest_TransactionType = 4
+	PostTransactionRequest_JOURNAL_ENTRY            PostTransactionRequest_TransactionType = 0
+	PostTransactionRequest_US_PAYMENT_ACH           PostTransactionRequest_TransactionType = 1
+	PostTransactionRequest_US_PAYMENT_FEDNOW        PostTransactionRequest_TransactionType = 2
+	PostTransactionRequest_US_PAYMENT_FEDWIRE       PostTransactionRequest_TransactionType = 3
+	PostTransactionRequest_DLT                      PostTransactionRequest_TransactionType = 4
+	PostTransactionRequest_PAYMENT_SUSPENSE         PostTransactionRequest_TransactionType = 5
+	PostTransactionRequest_PAYMENT_CLEARED_SUSPENSE PostTransactionRequest_TransactionType = 6
 )
 
 // Enum value maps for PostTransactionRequest_TransactionType.
@@ -214,13 +216,17 @@ var (
 		2: "US_PAYMENT_FEDNOW",
 		3: "US_PAYMENT_FEDWIRE",
 		4: "DLT",
+		5: "PAYMENT_SUSPENSE",
+		6: "PAYMENT_CLEARED_SUSPENSE",
 	}
 	PostTransactionRequest_TransactionType_value = map[string]int32{
-		"JOURNAL_ENTRY":      0,
-		"US_PAYMENT_ACH":     1,
-		"US_PAYMENT_FEDNOW":  2,
-		"US_PAYMENT_FEDWIRE": 3,
-		"DLT":                4,
+		"JOURNAL_ENTRY":            0,
+		"US_PAYMENT_ACH":           1,
+		"US_PAYMENT_FEDNOW":        2,
+		"US_PAYMENT_FEDWIRE":       3,
+		"DLT":                      4,
+		"PAYMENT_SUSPENSE":         5,
+		"PAYMENT_CLEARED_SUSPENSE": 6,
 	}
 )
 
@@ -3113,20 +3119,22 @@ const file_glmodel_gl_proto_rawDesc = "" +
 	"\x10PaymentLifecycle\x12\x13\n" +
 	"\x0fINITIAL_POSTING\x10\x00\x12\x14\n" +
 	"\x10CLEARING_POSTING\x10\x01\x12\x1c\n" +
-	"\x18CUSTOMER_ACCOUNT_POSTING\x10\x02\"\xdc\x03\n" +
+	"\x18CUSTOMER_ACCOUNT_POSTING\x10\x02\"\x91\x04\n" +
 	"\x16PostTransactionRequest\x12\x1a\n" +
 	"\bledgerId\x18\x01 \x01(\tR\bledgerId\x12Q\n" +
 	"\x0ftransactionType\x18\x02 \x01(\x0e2'.PostTransactionRequest.TransactionTypeR\x0ftransactionType\x121\n" +
 	"\fjournalEntry\x18\x03 \x01(\v2\r.JournalEntryR\fjournalEntry\x12.\n" +
 	"\vcorePayment\x18\x04 \x01(\v2\f.CorePaymentR\vcorePayment\x12=\n" +
 	"\x12ultimateOriginator\x18\x05 \x01(\v2\r.LedgerEntityR\x12ultimateOriginator\x12?\n" +
-	"\x13ultimateBeneficiary\x18\x06 \x01(\v2\r.LedgerEntityR\x13ultimateBeneficiary\"p\n" +
+	"\x13ultimateBeneficiary\x18\x06 \x01(\v2\r.LedgerEntityR\x13ultimateBeneficiary\"\xa4\x01\n" +
 	"\x0fTransactionType\x12\x11\n" +
 	"\rJOURNAL_ENTRY\x10\x00\x12\x12\n" +
 	"\x0eUS_PAYMENT_ACH\x10\x01\x12\x15\n" +
 	"\x11US_PAYMENT_FEDNOW\x10\x02\x12\x16\n" +
 	"\x12US_PAYMENT_FEDWIRE\x10\x03\x12\a\n" +
-	"\x03DLT\x10\x04\"\xa4\x02\n" +
+	"\x03DLT\x10\x04\x12\x14\n" +
+	"\x10PAYMENT_SUSPENSE\x10\x05\x12\x1c\n" +
+	"\x18PAYMENT_CLEARED_SUSPENSE\x10\x06\"\xa4\x02\n" +
 	"\x17PostTransactionResponse\x127\n" +
 	"\x06status\x18\x01 \x01(\v2\x1f.PostTransactionResponse.StatusR\x06status\x12$\n" +
 	"\rtransactionId\x18\x02 \x01(\tR\rtransactionId\x12,\n" +

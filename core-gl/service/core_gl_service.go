@@ -175,6 +175,15 @@ func (cgls *CoreGLService) PostTransaction(ctx context.Context, request *glmodel
 		response.TransactionId = fednowResult.TransactionID
 		response.TransactionStatus = fednowResult.Status
 
+	case glmodel.PostTransactionRequest_PAYMENT_SUSPENSE:
+		txId, err := PostJournalEntry(ctx, cgls.Bus, cgls.CoreLedgerClient, request.LedgerId, request.JournalEntry)
+		if err != nil {
+			response.Status = &glmodel.PostTransactionResponse_Status{Code: http.StatusInternalServerError, StatusMessage: fmt.Sprintf("Error posting Journal Entry SUSPENSE TX: %v", err)}
+			return &response, nil
+		}
+		response.TransactionId = txId
+		response.TransactionStatus = "POSTED"
+
 	default:
 		response.Status = &glmodel.PostTransactionResponse_Status{Code: http.StatusNotImplemented, StatusMessage: fmt.Sprintf("Unimplemented transaction type: %v", request.TransactionType)}
 		return &response, nil

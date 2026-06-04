@@ -104,27 +104,43 @@ func (wf *FednowInboundPaymentWorkflow) ProcessFednowInboundPayment(ctx workflow
 		ActivityID: "ProcessFednowInboundPayment",
 	}
 	ctx = workflow.WithActivityOptions(ctx, ao)
+	workflowId := workflow.GetInfo(ctx).WorkflowExecution.ID
+	workflowRunId := workflow.GetInfo(ctx).WorkflowExecution.RunID
 
-	/** PROCESS FEDNOW PAYMENT WORKFLOW
-	 *
-	 */
+	/****************************************************************************************************************************************************************************************************
+	 ****************************************************************************************************************************************************************************************************
+										PROCESS FEDNOW PAYMENT WORKFLOW
+	 ****************************************************************************************************************************************************************************************************
+	 ****************************************************************************************************************************************************************************************************
+	*/
 
 	var payment pmtmodel.Payment
+
+	// Store Raw Payment Instruction for further processing
 	err := workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).StoreRawPaymentInstruction, rawPaymentInstruction).Get(ctx, &payment)
 	if err != nil {
 		return "", err
 	}
 
+	// Validate Payment Instruction and parse the payment instruction
 	err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).ValidatePaymentInstruction, payment).Get(ctx, &payment)
 	if err != nil {
 		return "", err
 	}
 
+	// Update Payment Status
 	err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).UpdatePaymentStatus, payment, pmtmodel.PAYMENT_STATUS_PROCESSING).Get(ctx, &payment)
 	if err != nil {
 		return "", err
 	}
 
+	// Initial Ledger Entries
+	err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).FednowInitialLedgerEntries, payment, *wf.AccountingConfig).Get(ctx, &payment)
+	if err != nil {
+		return "", err
+	}
+
+	// Process all the entities in the payment (ie originator, beneficiary, etc)
 	err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).ProcessEntities, payment).Get(ctx, &payment)
 	if err != nil {
 		return "", err
@@ -134,7 +150,7 @@ func (wf *FednowInboundPaymentWorkflow) ProcessFednowInboundPayment(ctx workflow
 	var sanctionsScreenOriginator SanctionScreen
 	var sanctionsScreenBeneficiary SanctionScreen
 	childWorkflowOptions := workflow.ChildWorkflowOptions{
-		TaskQueue: "sanction-screen-queue",
+		TaskQueue: TASK_QUEUE_SANCTION_SCREEN,
 	}
 	ctx = workflow.WithChildOptions(ctx, childWorkflowOptions)
 
@@ -155,5 +171,32 @@ func (wf *FednowInboundPaymentWorkflow) ProcessFednowInboundPayment(ctx workflow
 	}
 	sanctionsScreen.Results = append(sanctionsScreen.Results, sanctionsScreenBeneficiary.Results...)
 
-	return fmt.Sprintf("%v", sanctionsScreen), nil
+	if len(sanctionsScreen.Results) > 0 {
+		// suspend payment, send to suspend payment workflow - async OK
+		workflow.ExecuteChildWorkflow(ctx, (&SuspendPayment{}).SuspendPaymentForReview, payment, sanctionsScreen, WorkflowDetails{
+			WorkflowID:    workflowId,
+			WorkflowRunID: workflowRunId,
+		})
+
+		// Wait for signal?
+		var resultOfReview ResultOfReview
+		reviewCompleteChannel := workflow.GetSignalChannel(ctx, "ReviewCompleteWithResults")
+		reviewCompleteChannel.Receive(ctx, &resultOfReview)
+
+		switch resultOfReview.Result {
+
+		case "PAYMENT_APPROVED":
+			return "OK", nil
+
+		case "PAYMENT_REJECTED":
+			return "REJECTED", nil
+
+		default:
+			return "", fmt.Errorf("invalid review result: %v", resultOfReview)
+
+		}
+
+	}
+
+	return "OK", nil
 }
