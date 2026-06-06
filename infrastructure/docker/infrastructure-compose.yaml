@@ -81,6 +81,12 @@ services:
     volumes:
       - "pgdb_data:/var/lib/postgresql"
       - "./pg_init:/docker-entrypoint-initdb.d"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d coreledgerdb -U coreuser"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     
   nats_one:
     container_name: nats01
@@ -155,3 +161,4 @@ services:
     restart: always
     ports:
       - 18080:8080
+

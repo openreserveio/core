@@ -186,16 +186,26 @@ func (wf *FednowInboundPaymentWorkflow) ProcessFednowInboundPayment(ctx workflow
 		switch resultOfReview.Result {
 
 		case "PAYMENT_APPROVED":
-			return "OK", nil
+			// Update Payment Status
+			err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).UpdatePaymentStatus, payment, pmtmodel.PAYMENT_STATUS_PROCESSING).Get(ctx, &payment)
+			if err != nil {
+				return "", err
+			}
 
 		case "PAYMENT_REJECTED":
-			return "REJECTED", nil
+			// Send to Child Workflow "Return"
 
 		default:
 			return "", fmt.Errorf("invalid review result: %v", resultOfReview)
 
 		}
 
+	}
+
+	// Now do Transaction Monitoring
+	err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).GetTransactionMonitoringRisk, ctx, payment, pmtmodel.PAYMENT_STATUS_PROCESSING).Get(ctx, &payment)
+	if err != nil {
+		return "", err
 	}
 
 	return "OK", nil
