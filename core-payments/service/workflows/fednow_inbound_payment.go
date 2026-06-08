@@ -3,7 +3,6 @@ package workflows
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"os"
 	"time"
 
@@ -15,6 +14,7 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
+	"go.temporal.io/api/enums/v1"
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 	"google.golang.org/grpc"
@@ -104,8 +104,6 @@ func (wf *FednowInboundPaymentWorkflow) ProcessFednowInboundPayment(ctx workflow
 		ActivityID: "ProcessFednowInboundPayment",
 	}
 	ctx = workflow.WithActivityOptions(ctx, ao)
-	workflowId := workflow.GetInfo(ctx).WorkflowExecution.ID
-	workflowRunId := workflow.GetInfo(ctx).WorkflowExecution.RunID
 
 	/****************************************************************************************************************************************************************************************************
 	 ****************************************************************************************************************************************************************************************************
@@ -122,14 +120,14 @@ func (wf *FednowInboundPaymentWorkflow) ProcessFednowInboundPayment(ctx workflow
 		return "", err
 	}
 
-	// Validate Payment Instruction and parse the payment instruction
-	err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).ValidatePaymentInstruction, payment).Get(ctx, &payment)
+	// Update Payment Status
+	err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).UpdatePaymentStatus, payment, pmtmodel.PAYMENT_STATUS_INSTRUCTION_RECEIVED).Get(ctx, &payment)
 	if err != nil {
 		return "", err
 	}
 
-	// Update Payment Status
-	err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).UpdatePaymentStatus, payment, pmtmodel.PAYMENT_STATUS_PROCESSING).Get(ctx, &payment)
+	// Validate Payment Instruction and parse the payment instruction
+	err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).ValidatePaymentInstruction, payment).Get(ctx, &payment)
 	if err != nil {
 		return "", err
 	}
@@ -140,73 +138,20 @@ func (wf *FednowInboundPaymentWorkflow) ProcessFednowInboundPayment(ctx workflow
 		return "", err
 	}
 
-	// Process all the entities in the payment (ie originator, beneficiary, etc)
-	err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).ProcessEntities, payment).Get(ctx, &payment)
-	if err != nil {
-		return "", err
-	}
-
-	// Kick off sanctions screening child workflow and wait for results
-	var sanctionsScreenOriginator SanctionScreen
-	var sanctionsScreenBeneficiary SanctionScreen
+	// Pass off to generic payment processing workflow
 	childWorkflowOptions := workflow.ChildWorkflowOptions{
-		TaskQueue: TASK_QUEUE_SANCTION_SCREEN,
+		ParentClosePolicy: enums.PARENT_CLOSE_POLICY_ABANDON,
+		TaskQueue:         TASK_QUEUE_INBOUND_PAYMENT_PROCESSING,
 	}
-	ctx = workflow.WithChildOptions(ctx, childWorkflowOptions)
+	childOptionsCtx := workflow.WithChildOptions(ctx, childWorkflowOptions)
+	wfFut := workflow.ExecuteChildWorkflow(childOptionsCtx, (&PaymentProcessingWorkflow{}).ProcessPayment, payment)
 
-	// ultimate originator
-	err = workflow.ExecuteChildWorkflow(ctx, (&EntitySanctionsScreenWorkflow{}).SanctionScreenEntity, payment.UltimateOriginatorEntityID).Get(ctx, &sanctionsScreenOriginator)
-	if err != nil {
-		return "", err
-	}
-
-	// ultimate beneficiary
-	err = workflow.ExecuteChildWorkflow(ctx, (&EntitySanctionsScreenWorkflow{}).SanctionScreenEntity, payment.UltimateBeneficiaryEntityID).Get(ctx, &sanctionsScreenBeneficiary)
-	if err != nil {
-		return "", err
-	}
-
-	sanctionsScreen := SanctionScreen{
-		Results: append(sanctionsScreenOriginator.Results, sanctionsScreenBeneficiary.Results...),
-	}
-	sanctionsScreen.Results = append(sanctionsScreen.Results, sanctionsScreenBeneficiary.Results...)
-
-	if len(sanctionsScreen.Results) > 0 {
-		// suspend payment, send to suspend payment workflow - async OK
-		workflow.ExecuteChildWorkflow(ctx, (&SuspendPayment{}).SuspendPaymentForReview, payment, sanctionsScreen, WorkflowDetails{
-			WorkflowID:    workflowId,
-			WorkflowRunID: workflowRunId,
-		})
-
-		// Wait for signal?
-		var resultOfReview ResultOfReview
-		reviewCompleteChannel := workflow.GetSignalChannel(ctx, "ReviewCompleteWithResults")
-		reviewCompleteChannel.Receive(ctx, &resultOfReview)
-
-		switch resultOfReview.Result {
-
-		case "PAYMENT_APPROVED":
-			// Update Payment Status
-			err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).UpdatePaymentStatus, payment, pmtmodel.PAYMENT_STATUS_PROCESSING).Get(ctx, &payment)
-			if err != nil {
-				return "", err
-			}
-
-		case "PAYMENT_REJECTED":
-			// Send to Child Workflow "Return"
-
-		default:
-			return "", fmt.Errorf("invalid review result: %v", resultOfReview)
-
-		}
-
-	}
-
-	// Now do Transaction Monitoring
-	err = workflow.ExecuteActivity(ctx, (&activities.PaymentActivity{}).GetTransactionMonitoringRisk, ctx, payment, pmtmodel.PAYMENT_STATUS_PROCESSING).Get(ctx, &payment)
-	if err != nil {
+	// Wait for the Child Workflow Execution to spawn
+	var childWE workflow.Execution
+	if err := wfFut.GetChildWorkflowExecution().Get(ctx, &childWE); err != nil {
 		return "", err
 	}
 
 	return "OK", nil
+
 }
