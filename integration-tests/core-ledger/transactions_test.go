@@ -200,4 +200,117 @@ var _ = Describe("Transactions", func() {
 
 	})
 
+	Describe("Posting to subaccounts and having parent account balances updates", func() {
+
+		var subLedgerId string
+		var parentAssetAccountId string
+		var childAssetAccountId string
+		var subLiabilityAccountId string
+
+		It("Creates a ledger, a parent asset account, and a child asset account", func() {
+
+			// Ledger
+			response, err := client.CreateLedger(context.Background(), &model.CreateLedgerRequest{
+				Name:        "test_ledger_for_subaccounts",
+				IsSubledger: false,
+			})
+			Expect(err).To(BeNil())
+			Expect(response.Name).To(Equal("test_ledger_for_subaccounts"))
+			Expect(response.LedgerId).To(Not(BeNil()))
+			subLedgerId = response.LedgerId
+
+			// Parent Asset Account
+			responseParent, err := client.CreateLedgerAccount(context.Background(), &model.CreateLedgerAccountRequest{
+				Name:     "cash",
+				Code:     "1000",
+				LedgerId: subLedgerId,
+				Class:    "ASSET",
+				Currency: "USD",
+			})
+			Expect(err).To(BeNil())
+			Expect(responseParent.Status.Code).To(Equal(int64(200)))
+			Expect(responseParent.Name).To(Equal("cash"))
+			Expect(responseParent.AccountId).To(Not(BeNil()))
+			parentAssetAccountId = responseParent.AccountId
+
+			// Child Asset Account (sub-account of the parent)
+			responseChild, err := client.CreateLedgerAccount(context.Background(), &model.CreateLedgerAccountRequest{
+				Name:            "cash_operating",
+				Code:            "1001",
+				LedgerId:        subLedgerId,
+				Class:           "ASSET",
+				Currency:        "USD",
+				ParentAccountId: parentAssetAccountId,
+			})
+			Expect(err).To(BeNil())
+			Expect(responseChild.Status.Code).To(Equal(int64(200)))
+			Expect(responseChild.Name).To(Equal("cash_operating"))
+			Expect(responseChild.AccountId).To(Not(BeNil()))
+			childAssetAccountId = responseChild.AccountId
+
+			// Liability Account to balance the transaction against
+			responseLiability, err := client.CreateLedgerAccount(context.Background(), &model.CreateLedgerAccountRequest{
+				Name:     "deposits",
+				Code:     "2000",
+				LedgerId: subLedgerId,
+				Class:    "LIABILITY",
+				Currency: "USD",
+			})
+			Expect(err).To(BeNil())
+			Expect(responseLiability.Status.Code).To(Equal(int64(200)))
+			Expect(responseLiability.Name).To(Equal("deposits"))
+			Expect(responseLiability.AccountId).To(Not(BeNil()))
+			subLiabilityAccountId = responseLiability.AccountId
+
+		})
+
+		It("Posts a balanced transaction debiting the child asset account", func() {
+
+			debitEntry := model.PostLedgerTransactionRequest_Entry{
+				AccountId: childAssetAccountId,
+				Amount:    500,
+				Currency:  "USD",
+			}
+			creditEntry := model.PostLedgerTransactionRequest_Entry{
+				AccountId: subLiabilityAccountId,
+				Amount:    500,
+				Currency:  "USD",
+			}
+
+			tx := model.PostLedgerTransactionRequest{
+				LedgerId: subLedgerId,
+				Debits:   []*model.PostLedgerTransactionRequest_Entry{&debitEntry},
+				Credits:  []*model.PostLedgerTransactionRequest_Entry{&creditEntry},
+			}
+
+			responseTxPost, err := client.PostLedgerTransaction(context.Background(), &tx)
+			Expect(err).To(BeNil())
+			Expect(responseTxPost.Status.Code).To(Equal(int64(200)))
+
+		})
+
+		It("Updates both the child account and the parent account balances correctly", func() {
+
+			// The child account reflects the posted debit
+			childResponse, err := client.GetLedgerAccountBalance(context.Background(), &model.GetLedgerAccountBalanceRequest{
+				AccountId: childAssetAccountId,
+				LedgerId:  subLedgerId,
+			})
+			Expect(err).To(BeNil())
+			Expect(childResponse.Status.Code).To(Equal(int64(200)))
+			Expect(childResponse.Balance).To(Equal(int64(500)))
+
+			// The parent account rolls up the child's balance
+			parentResponse, err := client.GetLedgerAccountBalance(context.Background(), &model.GetLedgerAccountBalanceRequest{
+				AccountId: parentAssetAccountId,
+				LedgerId:  subLedgerId,
+			})
+			Expect(err).To(BeNil())
+			Expect(parentResponse.Status.Code).To(Equal(int64(200)))
+			Expect(parentResponse.Balance).To(Equal(int64(500)))
+
+		})
+
+	})
+
 })
