@@ -28,4 +28,4 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ghcr.io/openreserveio/core-ledger:latest
-          file: ./core-ledger/application/docker/Dockerfile
+          file: application/coreledger/docker/Dockerfile
