@@ -22,8 +22,8 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
-          context: .
+          context: ./core-ledger
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ghcr.io/openreserveio/core-ledger:latest
-          file: ./core-ledger/application/docker/Dockerfile
+          file: ./application/docker/Dockerfile
