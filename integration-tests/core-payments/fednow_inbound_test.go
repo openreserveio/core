@@ -3,6 +3,7 @@ package core_payments_test
 import (
 	"context"
 	"encoding/xml"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,7 +21,7 @@ var _ = Describe("FednowInbound", func() {
 
 	BeforeEach(func() {
 
-		nc, _ := nats.Connect("localhost:4222")
+		nc, _ := nats.Connect(os.Getenv("BUS_URL"))
 		js, _ = jetstream.New(nc)
 
 	})

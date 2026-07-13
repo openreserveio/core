@@ -20,9 +20,10 @@ func init() {
 
 	fednowConnectorCmd.PersistentFlags().StringVar(&busConnUrl, "busconnurl", "", "nats://localhost:4322")
 	fednowConnectorCmd.PersistentFlags().StringVar(&ftpServiceUrl, "ftpserviceurl", "", "localhost:6379")
+	fednowConnectorCmd.PersistentFlags().StringVar(&temporalUrl, "temporalurl", "", "localhost:7233")
 
 	fednowConnectorCmd.MarkPersistentFlagRequired("busconnurl")
-	
+
 	rootCmd.AddCommand(fednowConnectorCmd)
 
 }
@@ -42,6 +43,7 @@ Connects to the Fednow Gateway and listens for payments events, while also sendi
 			InboundSubject:     "inbound",
 			OutboundStreamName: "FEDNOWOUT",
 			OutboundSubject:    "outbound",
+			TemporalUrl:        temporalUrl,
 		}
 
 		fednowConnector, err := connector.NewFedNowConnector(context.Background(), &config)

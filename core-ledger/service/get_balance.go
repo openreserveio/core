@@ -48,7 +48,7 @@ func getLatestBalance(ctx context.Context, db *bun.DB, forAccountID string) (*mo
 		Order("balance_date DESC").
 		Limit(1).
 		Scan(ctx, &accountBalance)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		log.Errorf("Unable to get latest balance for account ID %s: %v", forAccountID, err)
 		return nil, err
 	}
