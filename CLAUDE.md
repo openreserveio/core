@@ -36,6 +36,7 @@ core-ledger                 ← only service with direct DB writes
 - **`core-payments`** — payment rail framework with sub-commands per rail (`fednow-connector`, `fednow-inbound-payment-workflow`, etc.). Uses both NATS and gRPC.
 - **`core-external-api-service`** — HTTP REST + gRPC gateway for external clients; uses OpenAPI spec at `extapimodel/external-api.oas.yaml`.
 - **`core-fintech-programs`** — FinTech program management service (standalone or integrated).
+- **`core-util`** - Shared Logic between all core services like logging, OTEL, etc
 - **`integration-tests`** — standalone Go module with Ginkgo/Gomega tests that connect to live running services.
 
 ### Internal package conventions

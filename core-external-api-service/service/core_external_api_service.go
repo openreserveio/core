@@ -1,13 +1,17 @@
 package service
 
 import (
+	"context"
 	"fmt"
+	"os"
 
-	log "github.com/sirupsen/logrus"
-
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-gonic/gin"
+	"github.com/openreserveio/core/core-external-api-service/extapimodel"
 	"github.com/openreserveio/core/core-external-api-service/generated/glmodel"
 	"github.com/openreserveio/core/core-external-api-service/generated/model"
+	log "github.com/sirupsen/logrus"
+	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -44,9 +48,35 @@ func NewCoreExternalApiService(httpListenHost string, httpListenPort string, cor
 	apiService.GLClient = glmodel.NewGeneralLedgerServiceClient(glConn)
 
 	// Setup Gin
+	oidcProvider, err := oidc.NewProvider(context.Background(), "https://burke.delta.openreserve.io:28443/realms/openreserveio/.well-known/openid-configuration")
+	if err != nil {
+		log.Fatalf("Unable to create OIDC Provider:  %v", err)
+		os.Exit(1)
+	}
+	oauthConfig := oauth2.Config{
+		ClientID:     "core-external-api-service",
+		ClientSecret: "siJD1nzf58QN96en1FdRragaS9NaiTSWTgMKVHrhxhYeSxOQlUH9eWDaEQEtD7QTYEbrAIH0CuY6IrTMHrOaPV",
+		RedirectURL:  redirectURL,
+
+		// Discovery returns the OAuth2 endpoints.
+		Endpoint: oidcProvider.Endpoint(),
+
+		// "openid" is a required scope for OpenID Connect flows.
+		Scopes: []string{oidc.ScopeOpenID},
+	}
+
+	// Create an ID Token verifier.
+	idTokenVerifier := oidcProvider.Verifier(&oidc.Config{ClientID: "core-external-api-service"})
+
 	engine := gin.Default()
+
 	engine.GET("/", func(c *gin.Context) {
 		c.String(200, "Hello World!")
+	})
+
+	protectedGroup := engine.Group("/protected", oidcHandler)
+	protectedGroup.GET("/boo", func(c *gin.Context) {
+		c.String(200, "Auth Thing Here")
 	})
 	apiService.Gin = engine
 
@@ -56,4 +86,11 @@ func NewCoreExternalApiService(httpListenHost string, httpListenPort string, cor
 func (apiService *CoreExternalApiService) Start() {
 	err := apiService.Gin.Run(fmt.Sprintf("%s:%s", apiService.HttpListenHost, apiService.HttpListenPort))
 	log.Infof("Ending Core External API Service:  %v", err)
+}
+
+func (apiService *CoreExternalApiService) validateAuthClaims(claims *extapimodel.CoreAuthClaims) error {
+
+	log.Infof("Validate Auth Claims: %v", claims)
+	return nil
+
 }
