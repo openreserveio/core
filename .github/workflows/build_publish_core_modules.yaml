@@ -12,6 +12,8 @@ jobs:
           registry: ghcr.io
           username: ${{ vars.GH_USERNAME }}
           password: ${{ secrets.GH_TOKEN }}
+      
+      - uses: actions/checkout@v7
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
