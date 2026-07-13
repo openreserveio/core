@@ -71,4 +71,4 @@ require (
 	mellium.im/sasl v0.3.2 // indirect
 )
 
-replace github.com/openreserveio/core/core-util => ../core-util
+// replace github.com/openreserveio/core/core-util => ../core-util
