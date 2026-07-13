@@ -1,4 +1,4 @@
-package reports
+package service
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 
 	"github.com/openreserveio/core/core-gl/generated/model"
 	"github.com/openreserveio/core/core-gl/glmodel"
-	"github.com/openreserveio/core/core-gl/service"
 )
 
 func GenerateBalanceSheetReport(ctx context.Context, ledgerClient model.CoreLedgerServiceClient, ledgerId string, asOfDate time.Time) (*glmodel.BalanceSheet, error) {
@@ -146,7 +145,7 @@ func GetFinancialAccountBalances(ctx context.Context, ledgerClient model.CoreLed
 
 	response := []glmodel.FinancialAccountBalance{}
 	for _, account := range financialAccounts {
-		acctInfo, err := service.GetAccount(ctx, ledgerClient, ledgerId, account.Code, asOfDate)
+		acctInfo, err := GetAccount(ctx, ledgerClient, ledgerId, account.Code, asOfDate)
 		if err != nil {
 			return nil, err
 		}

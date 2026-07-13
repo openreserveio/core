@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"time"
 
 	"github.com/openreserveio/core/core-ledger/model"
@@ -63,6 +62,7 @@ func getLatestBalance(ctx context.Context, db *bun.DB, forAccountID string) (*mo
 
 func getBalanceAsOfDate(ctx context.Context, db *bun.DB, forAccountID string, asOfDatetime time.Time) (*model.AccountBalance, error) {
 
-	return nil, errors.New("UNIMPLEMENTED")
+	return getLatestBalance(ctx, db, forAccountID)
+	// return nil, errors.New("UNIMPLEMENTED")
 
 }

@@ -1,7 +1,4 @@
 -- ENTITY DB
-CREATE DATABASE entitydb WITH OWNER openreserveuser;
-use entitydb;
-
 DROP TABLE IF EXISTS entity;
 CREATE TABLE entity (
     id VARCHAR NOT NULL PRIMARY KEY,

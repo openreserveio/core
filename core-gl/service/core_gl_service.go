@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/openreserveio/core/core-gl/generated/glmodel"
 	"github.com/openreserveio/core/core-gl/generated/model"
@@ -146,6 +147,7 @@ func (cgls *CoreGLService) CreateChartOfAccounts(ctx context.Context, request *g
 
 	response.Status = &glmodel.CreateChartOfAccountsResponse_Status{Code: http.StatusOK}
 	response.ChartJSON = encodedCoa
+	response.CreatedLedgerId = updatedCoa.LedgerID
 
 	return &response, nil
 
@@ -362,8 +364,37 @@ func (cgls *CoreGLService) UpdateAccountMetadata(ctx context.Context, request *g
 }
 
 func (cgls *CoreGLService) GenerateReport(ctx context.Context, request *glmodel.GenerateReportRequest) (*glmodel.GenerateReportResponse, error) {
-	//TODO implement me
-	panic("implement me")
+
+	response := glmodel.GenerateReportResponse{}
+
+	switch request.BaseReportType {
+
+	case glmodel.GenerateReportRequest_BALANCE_SHEET:
+		log.Infof("Generating balance sheet report for ledger %s", request.LedgerId)
+		balanceSheet, err := GenerateBalanceSheetReport(ctx, cgls.CoreLedgerClient, request.LedgerId, time.Now())
+		if err != nil {
+			log.Errorf("Error generating balance sheet report: %v", err)
+			response.Status = &glmodel.GenerateReportResponse_Status{Code: http.StatusInternalServerError, StatusMessage: err.Error()}
+			return &response, nil
+		}
+
+		data, err := json.Marshal(balanceSheet)
+		if err != nil {
+			log.Errorf("Error marshaling balance sheet report: %v", err)
+			response.Status = &glmodel.GenerateReportResponse_Status{Code: http.StatusInternalServerError, StatusMessage: err.Error()}
+			return &response, nil
+		}
+
+		response.Status = &glmodel.GenerateReportResponse_Status{Code: http.StatusOK}
+		response.EncodedReport = data
+
+	default:
+		panic("implement me")
+
+	}
+
+	return &response, nil
+
 }
 
 func (cgls *CoreGLService) mustEmbedUnimplementedGeneralLedgerServiceServer() {

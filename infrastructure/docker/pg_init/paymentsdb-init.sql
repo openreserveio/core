@@ -1,7 +1,4 @@
 -- PAYMENTS DB
-CREATE DATABASE paymentsdb WITH OWNER openreserveuser;
-use paymentsdb;
-
 DROP TABLE IF EXISTS payment_network;
 CREATE TABLE payment_network (
     id VARCHAR(50) NOT NULL PRIMARY KEY,
