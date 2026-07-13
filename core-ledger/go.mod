@@ -5,7 +5,7 @@ go 1.26.3
 require (
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/google/uuid v1.6.0
-	github.com/openreserveio/core/core-util v0.0.0-20260601153348-c022f3420d56
+	github.com/openreserveio/core/core-util v0.0.0-20260713222530-494f3a687126
 	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/cobra v1.10.2
 	github.com/uptrace/bun v1.2.18
