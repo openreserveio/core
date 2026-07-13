@@ -27,6 +27,22 @@ func FindAllAccountsInLedger(ctx context.Context, db *bun.DB, ledgerId string) (
 
 }
 
+func FindAccountsByClass(ctx context.Context, db *bun.DB, ledgerId string, accountClass string) ([]*model.Account, error) {
+
+	var accounts []*model.Account
+	err := db.NewSelect().Model(&accounts).Where("ledger_id = ? AND class = ?", ledgerId, accountClass).Scan(ctx, &accounts)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		log.Errorf("Error scanning accounts (FindAllAccountsInLedger): %v", err)
+		return nil, err
+	}
+
+	return accounts, nil
+}
+
 func FindAccountsByMetadata(ctx context.Context, db *bun.DB, ledgerId string, metadataCriteria map[string]string) ([]*model.Account, error) {
 
 	if len(metadataCriteria) == 0 {
@@ -37,7 +53,7 @@ func FindAccountsByMetadata(ctx context.Context, db *bun.DB, ledgerId string, me
 	// construct a query where we look for JSON metadata that matches the criteria
 	var metadataQuery string
 	for key, value := range metadataCriteria {
-		fmt.Sprintf("\"%s\": \"%s\", ", key, value)
+		metadataQuery = metadataQuery + fmt.Sprintf("\"%s\": \"%s\", ", key, value)
 	}
 	// remove the trailing comma
 	metadataQuery = metadataQuery[:len(metadataQuery)-2]

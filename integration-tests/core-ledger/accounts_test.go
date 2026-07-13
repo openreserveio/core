@@ -120,6 +120,49 @@ var _ = Describe("Accounts", func() {
 
 		})
 
+		It("Finds the account by metadata", func() {
+
+			resp, err := client.FindLedgerAccounts(context.Background(), &model.FindLedgerAccountsRequest{
+				CriteriaType: model.FindLedgerAccountsRequest_BY_METADATA,
+				MetadataCriteria: map[string]string{
+					"name": "test_account_metadata",
+				},
+				LedgerId: ledgerId,
+			})
+			Expect(err).To(BeNil())
+			Expect(resp.Status.Code).To(Equal(int64(200)))
+			Expect(resp.Accounts).To(HaveLen(1))
+			Expect(resp.Accounts[0].Name).To(Equal("test_account_metadata"))
+			Expect(resp.Accounts[0].AccountId).To(Not(BeNil()))
+
+			respCode, err := client.FindLedgerAccounts(context.Background(), &model.FindLedgerAccountsRequest{
+				CriteriaType: model.FindLedgerAccountsRequest_BY_METADATA,
+				MetadataCriteria: map[string]string{
+					"code": "102",
+				},
+				LedgerId: ledgerId,
+			})
+			Expect(err).To(BeNil())
+			Expect(respCode.Status.Code).To(Equal(int64(200)))
+			Expect(respCode.Accounts).To(HaveLen(1))
+			Expect(respCode.Accounts[0].Name).To(Equal("test_account_metadata"))
+			Expect(respCode.Accounts[0].AccountId).To(Not(BeNil()))
+
+		})
+
+		It("Finds the accounts by class", func() {
+
+			respClass, err := client.FindLedgerAccounts(context.Background(), &model.FindLedgerAccountsRequest{
+				CriteriaType: model.FindLedgerAccountsRequest_BY_ACCOUNT_CLASS,
+				AccountClass: "ASSET",
+				LedgerId:     ledgerId,
+			})
+			Expect(err).To(BeNil())
+			Expect(respClass.Status.Code).To(Equal(int64(200)))
+			Expect(respClass.Accounts).To(HaveLen(2))
+
+		})
+
 	})
 
 })

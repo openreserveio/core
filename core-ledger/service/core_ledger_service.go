@@ -374,6 +374,30 @@ func (cls CoreLedgerService) FindLedgerAccounts(ctx context.Context, request *mo
 
 		}
 
+	case model.FindLedgerAccountsRequest_BY_ACCOUNT_CLASS:
+		accounts, err := FindAccountsByClass(ctx, cls.DB, request.LedgerId, request.AccountClass)
+		if err != nil {
+			response.Status = &model.Status{Code: http.StatusInternalServerError, StatusMessage: err.Error()}
+			return &response, nil
+		}
+
+		for _, account := range accounts {
+
+			matchedAccount := model.FindLedgerAccountsResponse_MatchedAccount{
+				MatchScore:      "100",
+				AccountId:       account.ID,
+				LedgerId:        account.LedgerID,
+				Code:            account.Code,
+				Name:            account.Name,
+				Class:           account.Class,
+				Metadata:        ConvertMapInterfaceToMapString(account.Metadata),
+				ParentAccountId: account.ParentAccountID.String,
+				Currency:        account.Currency,
+			}
+			response.Accounts = append(response.Accounts, &matchedAccount)
+
+		}
+
 	}
 
 	response.Status = &model.Status{Code: http.StatusOK}

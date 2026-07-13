@@ -174,11 +174,13 @@ message FindLedgerAccountsRequest {
   enum CriteriaType {
     BY_METADATA = 0;
     ALL_IN_LEDGER = 1;
+    BY_ACCOUNT_CLASS = 2;
   }
 
   CriteriaType criteriaType = 1;
   map<string, string> metadataCriteria = 2;
   string ledgerId = 3;
+  string accountClass = 4;
 
 }
 
