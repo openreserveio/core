@@ -4,7 +4,7 @@ go 1.26.3
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/openreserveio/core/core-util v0.0.0-20260601164812-6d325597269c
+	github.com/openreserveio/core/core-util v0.0.0-20260714140427-b48f735ebd43
 	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/cobra v1.10.2
 	github.com/uptrace/bun v1.2.18
@@ -70,4 +70,4 @@ require (
 	mellium.im/sasl v0.3.2 // indirect
 )
 
-replace github.com/openreserveio/core/core-util => ../core-util
+// replace github.com/openreserveio/core/core-util => ../core-util
