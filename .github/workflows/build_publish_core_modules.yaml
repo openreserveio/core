@@ -29,3 +29,32 @@ jobs:
           push: true
           tags: ghcr.io/openreserveio/core-ledger:latest
           file: ./core-ledger/application/coreledger/docker/Dockerfile
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: ./core-ledger-poster
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ghcr.io/openreserveio/core-ledger-poster:latest
+          file: ./core-ledger-poster/application/coreledgerposter/docker/Dockerfile
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: ./core-gl
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ghcr.io/openreserveio/core-gl:latest
+          file: ./core-gl/application/coregl/docker/Dockerfile
+
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: ./core-payments
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ghcr.io/openreserveio/core-payments:latest
+          file: ./core-payments/application/corepayments/docker/Dockerfile
+
+      
