@@ -8,7 +8,7 @@ Finsorb is a collection of financial microservices (Open Source) for building he
 
 ## Language & Toolchain
 
-- **Go 1.25.x** — each module declares its own version in `go.mod`
+- **Go 1.26.x** — each module declares its own version in `go.mod`
 - **Protocol Buffers / gRPC** — inter-service communication; source `.proto` files in each module's `model/` or `glmodel/` directory
 - **NATS JetStream** — async messaging bus used by `core-gl`, `core-ledger-poster`, and `core-payments`
 - **PostgreSQL via uptrace/bun** — ORM used across all data-bearing services
@@ -47,7 +47,6 @@ Every service follows the same layout:
 - `service/` — business logic; one file per operation (e.g. `post_ledger_transaction.go`)
 - `bus/` — NATS connect/send/receive helpers (copy-consistent across services)
 - `application/<servicename>/cmd/` — Cobra commands; `start.go` wires flags → service constructor → gRPC server
-- `otel/` — OpenTelemetry instrumentation and tracing
 
 ## Common Commands
 
