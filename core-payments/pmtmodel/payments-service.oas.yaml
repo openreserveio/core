@@ -1,0 +1,41 @@
+openapi: 3.0.3
+info:
+  title: "Finsorb External API Service"
+  description: |
+
+    This service exposes REST endpoints for the ACH Payments Service
+
+  version: 1.0.0
+
+security:
+  - bearerAuth: []
+paths:
+  /ach/payment:
+    post:
+      summary: "Post a new Payment for Processing"
+      description: |
+        Post a new Payment for Processing
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentOrigination"
+
+      responses:
+        "200":
+          description: "Payment Accepted for Processing"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentOrigination"
+        "400":
+          description: "Invalid request"
+
+components:
+  schemas:
+    ACHPaymentOrigination:
+      type: object
+      properties:
+

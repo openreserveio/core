@@ -39,7 +39,7 @@ var _ = Describe("FednowInbound", func() {
 				Text: "100.00",
 			}
 			settlementDate := fednow.ISODate(time.Now().AddDate(0, 0, -1))
-			clearingSystem := pacs_008_001_08.ExternalCashClearingSystem1Code("FDW")
+			clearingSystem := pacs_008_001_08.ExternalCashClearingSystem1Code("FDW") // FDW = FedWire, FDA = FedACH, CHC = Chips, RTP = Real Time Payments
 
 			ultimateDebtorName := pacs_008_001_08.Max140Text("Ultimate Debtorperson")
 			ultimateDebtorStreetName := pacs_008_001_08.Max70Text("230th Street SE")
