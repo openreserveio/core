@@ -84,7 +84,7 @@ Workflow to manage the inbound processing of Fednow messages
 		ppWorkflow := workflows.NewPaymentProcessingWorkflow(paymentsDbUrl, entityDbUrl, coreGlUrl, accountingConfig)
 
 		// Create the Temporal worker
-		paymentActivity := activities.NewPaymentActivity(fednowInboundWorkflow.PaymentsDB, fednowInboundWorkflow.EntityDB, fednowInboundWorkflow.GLServiceClient)
+		paymentActivity := activities.NewPaymentActivity(fednowInboundWorkflow.PaymentsDB, fednowInboundWorkflow.EntityDB, fednowInboundWorkflow.GLServiceClient, fednowInboundWorkflow.BusConn)
 		w := worker.New(c, workflows.TASK_QUEUE_FEDNOW_INBOUND_PAYMENT, worker.Options{})
 		w.RegisterWorkflow(fednowInboundWorkflow.ProcessFednowInboundPayment)
 		w.RegisterWorkflow(suspendPaymentWorkflow.SuspendPaymentForReview)
