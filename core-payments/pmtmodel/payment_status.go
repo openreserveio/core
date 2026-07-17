@@ -13,3 +13,11 @@ var (
 	PAYMENT_STATUS_OFAC_IN_PROGRESS      = "OFAC_IN_PROGRESS"
 	PAYMENT_STATUS_IN_REVIEW             = "IN_REVIEW"
 )
+
+type PaymentStatusUpdateNotification struct {
+	PaymentID        string `json:"payment_id"`
+	NotificationDate string `json:"notification_date"`
+	PreviousStatus   string `json:"previous_status"`
+	CurrentStatus    string `json:"current_status"`
+	AdditionalInfo   string `json:"additional_info"`
+}

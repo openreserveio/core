@@ -2,16 +2,21 @@ package activities
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/openreserveio/core/core-payments/pmtmodel"
+	"github.com/openreserveio/core/core-util/bus"
 	log "github.com/sirupsen/logrus"
 	"github.com/uptrace/bun"
 )
 
 func (act *PaymentActivity) UpdatePaymentStatus(ctx context.Context, payment pmtmodel.Payment, paymentStatus string) error {
 
+	var previousPaymentStatus string
+
+	previousPaymentStatus = payment.CurrentPaymentStatus
 	payment.CurrentPaymentStatus = paymentStatus
 	_, err := act.PaymentsDB.NewUpdate().Model(&payment).Where("id = ?", payment.ID).Exec(ctx)
 	if err != nil {
@@ -32,6 +37,16 @@ func (act *PaymentActivity) UpdatePaymentStatus(ctx context.Context, payment pmt
 		log.Errorf("Error inserting status update step: %v", err)
 		return err
 	}
+
+	paymentStatusUpdateNotification := pmtmodel.PaymentStatusUpdateNotification{
+		PaymentID:        payment.ID,
+		NotificationDate: time.Now().String(),
+		PreviousStatus:   previousPaymentStatus,
+		CurrentStatus:    payment.CurrentPaymentStatus,
+		AdditionalInfo:   "",
+	}
+
+	bus.Send(ctx, act.BusConn, fmt.Sprintf("%s.%s", "payments_service", "payment_status_update_notification"), &paymentStatusUpdateNotification)
 
 	return nil
 }
