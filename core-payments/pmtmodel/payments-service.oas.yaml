@@ -1,16 +1,16 @@
 openapi: 3.0.3
 info:
-  title: "Finsorb External API Service"
+  title: "Payments API Service"
   description: |
 
-    This service exposes REST endpoints for the ACH Payments Service
+    This service exposes REST endpoints for the Payments Service
 
   version: 1.0.0
 
 security:
   - bearerAuth: []
 paths:
-  /ach/payment:
+  /payment:
     post:
       summary: "Post a new Payment for Processing"
       description: |
@@ -35,7 +35,15 @@ paths:
 
 components:
   schemas:
-    ACHPaymentOrigination:
+    PaymentOrigination:
       type: object
       properties:
+        payment_id:
+          type: string
+          description: "The payment ID, given to payment by the Payment Service"
+        payment_network_id:
+          type: string
+          description: "The payment network ID"
+          enum: ["ach", "fedwire", "fednow", "sepa"]
+
 
